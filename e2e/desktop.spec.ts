@@ -32,6 +32,14 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   const task = page.getByRole('checkbox', { name: 'Incomplete task' }).first()
   await expect(task).toHaveCSS('appearance', 'none')
   await expect(task.locator('xpath=..')).toHaveCSS('list-style-type', 'none')
+  const graphRenderMarker = 'stable-cytoscape-canvas'
+  await page
+    .locator('.graph-canvas canvas')
+    .first()
+    .evaluate(
+      (canvas, marker) => canvas.setAttribute('data-render-marker', marker),
+      graphRenderMarker,
+    )
 
   const issueList = page.getByRole('list', { name: 'Filtered issues' })
   const search = page.getByRole('textbox', { name: 'Search issues' })
@@ -83,6 +91,7 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-color-mode', 'dark')
   const darkBackground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
   expect(darkBackground).not.toBe(lightBackground)
+  await expect(page.locator(`[data-render-marker="${graphRenderMarker}"]`)).toHaveCount(1)
 
   const jsonDownload = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Export' }).click()

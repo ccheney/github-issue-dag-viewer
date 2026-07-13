@@ -195,6 +195,33 @@ const downloadPng = (cy: Core): void => {
   anchor.click()
 }
 
+const fitGraph = (cy: Core): void => {
+  if (cy.nodes().length > 0) cy.fit(cy.elements(), 48)
+}
+
+const centerGraph = (cy: Core, selectedKey: string | null): void => {
+  const initialNode = selectedKey === null ? cy.nodes().first() : cy.getElementById(selectedKey)
+  cy.zoom(0.72)
+  if (!initialNode.empty()) cy.center(initialNode)
+}
+
+const runLayout = (cy: Core, direction: LayoutDirection, onStop: (cy: Core) => void): void => {
+  cy.one('layoutstop', () => {
+    if (!cy.destroyed()) onStop(cy)
+  })
+  cy.layout({
+    name: 'dagre',
+    rankDir: direction,
+    rankSep: 90,
+    nodeSep: 28,
+    edgeSep: 14,
+    padding: 48,
+    animate: cy.elements().length < 500,
+    animationDuration: 380,
+    fit: false,
+  } as dagre.DagreLayoutOptions).run()
+}
+
 export const GraphCanvas = ({
   analysis,
   colorMode,
@@ -210,55 +237,73 @@ export const GraphCanvas = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const cyRef = useRef<Core | null>(null)
   const fitRevisionRef = useRef(fitRevision)
+  const directionRef = useRef(direction)
+  const elementsSignatureRef = useRef('')
   const onSelectRef = useRef(onSelect)
   const selectedKeyRef = useRef(selectedKey)
   onSelectRef.current = onSelect
   selectedKeyRef.current = selectedKey
   const elements = useMemo(() => graphElements(analysis, issueKeys), [analysis, issueKeys])
+  const elementsSignature = useMemo(() => JSON.stringify(elements), [elements])
+  const initialGraphRef = useRef({
+    colorMode,
+    direction,
+    elements,
+    elementsSignature,
+    fitRevision,
+  })
 
   useEffect(() => {
     if (containerRef.current === null) return
-    const shouldFit = fitRevisionRef.current !== fitRevision
-    fitRevisionRef.current = fitRevision
+    const initial = initialGraphRef.current
+    elementsSignatureRef.current = initial.elementsSignature
+    directionRef.current = initial.direction
+    fitRevisionRef.current = initial.fitRevision
     const cy = cytoscape({
       container: containerRef.current,
-      elements,
-      style: graphStyles(colorMode),
+      elements: initial.elements,
+      style: graphStyles(initial.colorMode),
       minZoom: 0.08,
       maxZoom: 2.5,
     })
     cyRef.current = cy
     cy.on('tap', 'node', (event) => onSelectRef.current(event.target.id()))
-    const layout = cy.layout({
-      name: 'dagre',
-      rankDir: direction,
-      rankSep: 90,
-      nodeSep: 28,
-      edgeSep: 14,
-      padding: 48,
-      animate: elements.length < 500,
-      animationDuration: 380,
-      fit: false,
-    } as dagre.DagreLayoutOptions)
-    if (shouldFit) {
-      cy.one('layoutstop', () => {
-        if (!cy.destroyed() && cy.nodes().length > 0) cy.fit(cy.elements(), 48)
-      })
-    }
-    layout.run()
-    const initialNode =
-      selectedKeyRef.current === null
-        ? cy.nodes().first()
-        : cy.getElementById(selectedKeyRef.current)
-    if (!shouldFit) {
-      cy.zoom(0.72)
-      if (!initialNode.empty()) cy.center(initialNode)
-    }
+    runLayout(cy, initial.direction, (graph) => centerGraph(graph, selectedKeyRef.current))
     return () => {
       cy.destroy()
       cyRef.current = null
     }
-  }, [colorMode, direction, elements, fitRevision])
+  }, [])
+
+  useEffect(() => {
+    cyRef.current?.style(graphStyles(colorMode))
+  }, [colorMode])
+
+  useEffect(() => {
+    const cy = cyRef.current
+    if (cy === null) return
+    const elementsChanged = elementsSignatureRef.current !== elementsSignature
+    const directionChanged = directionRef.current !== direction
+    const shouldFit = fitRevisionRef.current !== fitRevision
+    elementsSignatureRef.current = elementsSignature
+    directionRef.current = direction
+    fitRevisionRef.current = fitRevision
+
+    if (!elementsChanged && !directionChanged) {
+      if (shouldFit) fitGraph(cy)
+      return
+    }
+
+    cy.stop(true)
+    if (elementsChanged) {
+      cy.elements().remove()
+      cy.add(elements)
+    }
+    runLayout(cy, direction, (graph) => {
+      if (shouldFit || directionChanged) fitGraph(graph)
+      else centerGraph(graph, selectedKeyRef.current)
+    })
+  }, [direction, elements, elementsSignature, fitRevision])
 
   useEffect(() => {
     const cy = cyRef.current
