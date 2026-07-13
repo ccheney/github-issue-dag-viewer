@@ -53,7 +53,7 @@ export const foundationTasks: readonly BlueprintTask[] = [
     completed: true,
     outcome: 'Establish a static React application compiled by Vite with ES2024 TypeScript.',
     scope: [
-      'Configure React 19, Vite 8, strict project references, and browser entry points.',
+      'Configure React 19, Vite 8, strict compiler settings, and browser entry points.',
       'Use exact optional properties, unchecked index protection, and no implicit escape hatches.',
     ],
     acceptance: 'The application type-checks and produces a static production bundle.',
