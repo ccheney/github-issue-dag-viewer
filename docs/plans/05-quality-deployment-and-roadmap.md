@@ -14,6 +14,7 @@ The [contributor and operations guide](../contributor-guide.md) is the clean-clo
 | `bun run dev` | Run the local Vite development server |
 | `bun run check:fix` | Apply safe formatting and lint fixes |
 | `bun run check` | Verify formatting, linting, and TypeScript |
+| `bun run check:bundle` | Enforce gzip budgets for the shell, graph, Markdown, total JavaScript, and CSS |
 | `bun run typecheck` | Run strict TypeScript project checks |
 | `bun run test` | Run deterministic unit and component tests |
 | `bun run test:e2e` | Run browser workflows |
@@ -130,7 +131,9 @@ Generate deterministic 1,000-node and 5,000-node fixtures with sparse chains, wi
 - PNG export time and dimensions.
 - Initial JavaScript transfer and parse cost.
 
-The current production bundle warning is a measured delivery task, not a reason to disable warnings. Split Cytoscape, Dagre, and Markdown code only when measurements show an improvement to first interaction without degrading graph transitions.
+The production shell, Cytoscape/Dagre renderer, and Markdown renderer are separate chunks. The compressed budgets are 215 KiB for the shell entry, 165 KiB for graph code, 50 KiB for Markdown, 420 KiB for total JavaScript, and 52 KiB for CSS. The build enforces those limits without suppressing Vite or upstream CSS warnings.
+
+Repositories through 1,000 issues lay out automatically. Repositories from 1,001 through 5,000 retain list, filter, detail, and JSON workflows while graph layout waits for explicit consent. Larger repositories keep those non-canvas workflows but disable unsupported full-canvas layout. PNG export is unavailable when either visible layout dimension exceeds 6,000 pixels, and layout failures remain recoverable through non-canvas workflows.
 
 ## Ordered delivery increments
 

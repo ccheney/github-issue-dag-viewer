@@ -3,7 +3,8 @@ import { BaseStyles, Flash, Spinner, ThemeProvider } from '@primer/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppHeader } from './components/AppHeader'
 import { FilterPanel } from './components/FilterPanel'
-import { GraphCanvas, type LayoutDirection } from './components/GraphCanvas'
+import { GraphArea } from './components/GraphArea'
+import type { LayoutDirection } from './components/GraphCanvas'
 import { IssueInspector } from './components/IssueInspector'
 import { IssueList } from './components/IssueList'
 import { RepositoryDialog } from './components/RepositoryDialog'
@@ -215,11 +216,12 @@ export default function App(): React.JSX.Element {
               selectedKey={selectedKey}
             />
           </aside>
-          <GraphCanvas
+          <GraphArea
             analysis={analysis}
             colorMode={colorMode}
             direction={direction}
             issueKeys={visibleKeys}
+            key={snapshot.fetchedAt}
             onDirectionChange={setDirection}
             onOpenInspector={() => setInspectorOpen(true)}
             onOpenIssues={() => setIssuesOpen(true)}

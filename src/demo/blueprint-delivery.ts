@@ -276,7 +276,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
       'pages-workflow',
       'large-graph-benchmark',
     ],
-    completed: false,
+    completed: true,
     outcome: 'Reduce the cost of loading the static viewer without weakening graph capability.',
     scope: [
       'Measure and split heavy graph and Markdown dependencies where it improves user-visible loading.',

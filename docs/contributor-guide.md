@@ -102,6 +102,7 @@ The browser calls GitHub GraphQL directly. Zod validates the response before it 
 | Command | Result |
 | --- | --- |
 | `bun run check` | Biome formatting/lint checks and strict TypeScript |
+| `bun run check:bundle` | Enforced compressed production bundle budgets after a build |
 | `bun run typecheck` | Strict TypeScript only |
 | `bun run test` | Unit and GitHub client contract tests |
 | `bun run test:e2e` | Desktop/mobile Playwright and automated accessibility workflows |
@@ -109,7 +110,7 @@ The browser calls GitHub GraphQL directly. Zod validates the response before it 
 | `bun run verify` | All repository gates in CI order |
 | `bun run benchmark:graphs` | Deterministic large-graph measurements |
 
-Run `bun run verify` before pushing. The build currently reports upstream Primer `@position-try` minifier warnings and tracks the large JavaScript chunk as delivery work; do not suppress either warning to make the output quieter.
+Run `bun run verify` before pushing. The build reports upstream Primer `@position-try` minifier warnings and Vite's raw entry-size warning while independently enforcing compressed bundle budgets; do not suppress those warnings to make the output quieter.
 
 ## GitHub Pages deployment
 
@@ -135,8 +136,8 @@ GitHub Pages cannot emit the response-header-only `frame-ancestors` directive. T
 
 - GitHub issue pagination is complete, but each issue's `blockedBy` and `blocking` connection is capped at 100 entries. The UI warns when a relationship is truncated.
 - Cross-repository nodes are partial references; their labels, actors, bodies, and complete dependency neighborhoods are not fetched.
-- Dagre layout becomes multi-second on graphs with thousands of issues and exceeded the stack on the measured 5,000-node chain. Current measurements are in [the large-graph benchmark](./performance/large-graph-benchmark.md).
-- PNG dimensions are bounded and are not a lossless export for very large graphs. JSON remains the complete filtered data export.
+- Dagre layout becomes multi-second on graphs with thousands of issues and exceeded the stack on the measured 5,000-node chain. Layout requires consent above 1,000 issues and is unavailable above 5,000; current measurements are in [the large-graph benchmark](./performance/large-graph-benchmark.md).
+- PNG export is unavailable when either visible graph dimension exceeds 6,000 pixels. JSON remains the complete filtered data export.
 - System color mode is the only theme mode.
 - The static Pages host cannot provide response-header framing controls.
 

@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && bun run check:bundle",
     "preview": "vite preview",
     "check": "biome check . && tsc --noEmit --pretty false",
+    "check:bundle": "bun run scripts/check-bundle-budget.ts",
     "check:fix": "biome check --write .",
     "typecheck": "tsc --noEmit --pretty false",
     "test": "vitest run",

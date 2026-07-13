@@ -5,6 +5,7 @@ export default defineConfig({
   base: './',
   plugins: [react()],
   build: {
+    manifest: true,
     sourcemap: true,
     target: 'es2024',
   },

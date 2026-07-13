@@ -8,15 +8,10 @@ import {
   PersonIcon,
 } from '@primer/octicons-react'
 import { Button, Label, Spinner } from '@primer/react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import { lazy, Suspense } from 'react'
 import type { GraphAnalysis, IssueRecord } from '../domain/types'
 
-const MarkdownTaskInput = (props: React.ComponentProps<'input'>): React.JSX.Element => (
-  <input {...props} aria-label={props.checked ? 'Completed task' : 'Incomplete task'} />
-)
-
-const markdownComponents = { input: MarkdownTaskInput }
+const MarkdownBody = lazy(() => import('./MarkdownBody'))
 
 interface IssueInspectorProps {
   analysis: GraphAnalysis
@@ -158,9 +153,15 @@ export const IssueInspector = ({
           ) : issue.body === null || issue.body.length === 0 ? (
             <p className="muted">No description provided.</p>
           ) : (
-            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
-              {issue.body}
-            </ReactMarkdown>
+            <Suspense
+              fallback={
+                <div className="body-loading">
+                  <Spinner size="small" /> Rendering description…
+                </div>
+              }
+            >
+              <MarkdownBody body={issue.body} />
+            </Suspense>
           )}
         </section>
       </div>

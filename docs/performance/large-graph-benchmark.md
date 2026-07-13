@@ -42,15 +42,29 @@ The current cap prevents an unbounded bitmap allocation, but it crops most large
 
 ## Budgets and guardrails
 
-The first release should use these defaults:
+The first release uses these defaults:
 
-- Up to 1,000 nodes: allow automatic Dagre layout, disable animation at the existing 500-element threshold, and target analysis under 50 ms, layout under 1 second, and interaction under 20 ms on the reference machine.
-- 1,001–5,000 nodes: enter large-graph mode. Keep list/filter/JSON workflows available, warn before layout, run layout away from urgent interaction, and recover from layout failure or timeout.
-- Above 5,000 nodes: treat full-canvas layout as unsupported until an alternative layout or virtualization strategy has measured evidence.
-- Do not offer full PNG export when the uncapped graph extent exceeds the 6,000-pixel bound. Explain the limit and keep JSON export available.
+- Up to 1,000 nodes: Dagre runs automatically, animation is disabled at the existing 500-element threshold, and the targets are analysis under 50 ms, layout under 1 second, and interaction under 20 ms on the reference machine.
+- 1,001–5,000 nodes: the graph library and layout stay paused behind explicit user consent. List, filter, detail, and JSON workflows remain available before layout.
+- Above 5,000 nodes: full-canvas layout is disabled until an alternative layout or virtualization strategy has measured evidence.
+- Full PNG export is disabled when either visible layout dimension exceeds 6,000 pixels. The viewer explains the limit and keeps JSON export available.
 - Never retry the same failed Dagre layout automatically; a deep graph can spend more than 11 seconds before throwing.
 
-Issue #37 owns the implementation response: graph-library code splitting, non-blocking layout, large-graph warnings, layout failure recovery, and export eligibility. The benchmark does not hide those product limits by raising timeouts or warning thresholds.
+Layout failures are caught and surfaced without removing the issue list or JSON export. The benchmark does not hide product limits by raising timeouts or warning thresholds.
+
+## Bundle delivery
+
+The production build separates the shell, graph renderer, and Markdown renderer through static dynamic-import boundaries. Vite keeps their shared dependencies optimized while allowing large repositories to avoid downloading Cytoscape and Dagre until the user requests layout.
+
+| Asset | Measured gzip | Enforced budget |
+| --- | ---: | ---: |
+| Application entry | 202.7 KiB | 215 KiB |
+| Cytoscape and Dagre graph chunk | 152.4 KiB | 165 KiB |
+| Markdown renderer chunk | 44.8 KiB | 50 KiB |
+| Total JavaScript | 399.9 KiB | 420 KiB |
+| CSS | 48.1 KiB | 52 KiB |
+
+Before splitting, the single application JavaScript entry was 398.6 KiB gzip. The shell entry is now 49% smaller while total capability remains within the 420 KiB JavaScript budget. `bun run check:bundle` reads the Vite manifest and fails when a boundary disappears or any compressed budget is exceeded.
 
 ## Reproduction notes
 

@@ -33,7 +33,7 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   ).toHaveAttribute('href', 'https://github.com/ccheney/github-issue-dag-viewer')
   await expect(
     page.getByRole('heading', {
-      name: 'Optimize initial loading and graph bundle delivery',
+      name: 'Publish the first production release',
     }),
   ).toBeVisible()
   const task = page.getByRole('checkbox', { name: 'Incomplete task' }).first()
@@ -59,16 +59,16 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await expect(issueList.getByRole('button')).toHaveCount(1)
   await expect(
     issueList.getByRole('button', {
-      name: /Optimize initial loading and graph bundle delivery/,
+      name: /Publish the first production release/,
     }),
   ).toBeVisible()
   await page.getByRole('button', { name: 'Labels', exact: true }).click()
   const labelSearch = page.getByRole('textbox', { name: 'Filter labels' })
-  await labelSearch.fill('performance')
-  const performanceLabel = page.getByRole('menuitemcheckbox', { name: 'area:performance' })
-  await expect(performanceLabel).toBeVisible()
-  await performanceLabel.click()
-  await expect(search).toHaveValue('is:issue state:open is:ready label:"area:performance"')
+  await labelSearch.fill('delivery')
+  const deliveryLabel = page.getByRole('menuitemcheckbox', { name: 'area:delivery' })
+  await expect(deliveryLabel).toBeVisible()
+  await deliveryLabel.click()
+  await expect(search).toHaveValue('is:issue state:open is:ready label:"area:delivery"')
   await page.keyboard.press('Escape')
 
   const horizontal = page.getByRole('button', { name: 'Use left-to-right layout' })
