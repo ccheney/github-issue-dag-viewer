@@ -1,36 +1,20 @@
-import {
-  DeviceDesktopIcon,
-  DownloadIcon,
-  KeyIcon,
-  MarkGithubIcon,
-  MoonIcon,
-  RepoIcon,
-  SunIcon,
-} from '@primer/octicons-react'
+import { DownloadIcon, KeyIcon, MarkGithubIcon, RepoIcon } from '@primer/octicons-react'
 import { Button, Link, Text } from '@primer/react'
-import type { ColorModePreference } from '../hooks/use-color-mode'
 
 interface AppHeaderProps {
-  colorMode: ColorModePreference
   repository: string
   source: 'demo' | 'github'
   onChangeRepository: () => void
   onExport: () => void
-  onToggleColorMode: () => void
 }
 
 export const AppHeader = ({
-  colorMode,
   repository,
   source,
   onChangeRepository,
   onExport,
-  onToggleColorMode,
 }: AppHeaderProps): React.JSX.Element => {
   const [owner, name] = repository.split('/')
-  const nextMode = colorMode === 'auto' ? 'light' : colorMode === 'light' ? 'dark' : 'system'
-  const ThemeIcon =
-    colorMode === 'auto' ? DeviceDesktopIcon : colorMode === 'light' ? SunIcon : MoonIcon
 
   return (
     <header className="app-header">
@@ -61,14 +45,6 @@ export const AppHeader = ({
       <nav className="header-actions" aria-label="Application controls">
         <Button leadingVisual={DownloadIcon} onClick={onExport} variant="invisible">
           Export
-        </Button>
-        <Button
-          aria-label={`Theme: ${colorMode === 'auto' ? 'system' : colorMode}. Switch to ${nextMode} mode`}
-          leadingVisual={ThemeIcon}
-          onClick={onToggleColorMode}
-          variant="invisible"
-        >
-          {colorMode === 'auto' ? 'System' : colorMode === 'light' ? 'Light' : 'Dark'}
         </Button>
         <Button leadingVisual={KeyIcon} onClick={onChangeRepository}>
           Open repository

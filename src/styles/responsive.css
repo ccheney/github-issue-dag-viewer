@@ -4,7 +4,7 @@
   }
 
   .graph-actions button span:last-child,
-  .header-actions button:nth-child(-n + 2) span:last-child {
+  .header-actions button:first-child span:last-child {
     display: none;
   }
 
@@ -22,7 +22,7 @@
 
   .brand-description,
   .source-badge,
-  .header-actions button:nth-child(-n + 2) {
+  .header-actions button:first-child {
     display: none;
   }
 

@@ -61,7 +61,7 @@ const selectInitialIssue = (snapshot: RepositorySnapshot): string | null => {
 
 export default function App(): React.JSX.Element {
   const initialRepository = repositoryFromUrl()
-  const [colorMode, resolvedColorMode, toggleColorMode] = useColorMode()
+  const colorMode = useColorMode()
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(demoSnapshot)
   const [source, setSource] = useState<'demo' | 'github'>('demo')
   const [filters, setFilters] = useState<GraphFilters>(initialFilters)
@@ -182,13 +182,11 @@ export default function App(): React.JSX.Element {
   )
 
   return (
-    <ThemeProvider colorMode={colorMode} dayScheme="light" nightScheme="dark">
+    <ThemeProvider colorMode="auto" dayScheme="light" nightScheme="dark">
       <BaseStyles className="app-root">
         <AppHeader
-          colorMode={colorMode}
           onChangeRepository={() => setDialogOpen(true)}
           onExport={() => downloadJson(snapshot, visibleKeys)}
-          onToggleColorMode={toggleColorMode}
           repository={snapshot.repository.nameWithOwner}
           source={source}
         />
@@ -224,7 +222,7 @@ export default function App(): React.JSX.Element {
           </aside>
           <GraphCanvas
             analysis={analysis}
-            colorMode={resolvedColorMode}
+            colorMode={colorMode}
             direction={direction}
             fitRevision={filterRevision}
             issueKeys={visibleKeys}

@@ -6,7 +6,7 @@ The interface follows GitHub's functional design language:
 
 - System typography and GitHub-like density.
 - Primer controls, tokens, spacing, borders, radii, and focus treatment.
-- Octicons for familiar issue, repository, branch, export, theme, and layout actions.
+- Octicons for familiar issue, repository, branch, export, and layout actions.
 - Neutral canvas and panel surfaces in light and dark modes.
 - Blue for selection/readiness, green for open work, purple for closed work, and attention tones for cycles or upstream context.
 
@@ -31,7 +31,7 @@ The header contains:
 - Product identity.
 - Current `owner/repository` and demo/live source state.
 - JSON export.
-- Light/dark toggle.
+- Automatic system light/dark mode.
 - Repository/token dialog trigger.
 
 The summary shows open, ready, blocked, and layer counts, plus cycles when present. Counts remain compact enough to scan at narrow widths.
@@ -89,7 +89,7 @@ Bulk repository load excludes bodies. The inspector owns the visible loading sta
 
 ## Color modes
 
-Initialize from `prefers-color-scheme` and allow a tab-scoped toggle. Primer ThemeProvider and Cytoscape receive the same effective mode. Exported PNG background follows the effective graph mode.
+Follow `prefers-color-scheme` continuously. Primer ThemeProvider and Cytoscape receive the same effective mode without an application-level override. Exported PNG background follows the effective graph mode.
 
 Do not use color alone for state. Issue icons, border style, line style, labels, and text provide redundant cues.
 

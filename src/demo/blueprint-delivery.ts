@@ -67,7 +67,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     outcome: 'Keep the application and graph readable across GitHub-aligned light and dark themes.',
     scope: [
       'Drive Primer ThemeProvider and Cytoscape palettes from one color-mode hook.',
-      'Honor system preference initially and provide an explicit persistent-in-tab toggle.',
+      'Follow the system color preference continuously without a separate application override.',
     ],
     acceptance:
       'All controls, text, graph states, focus rings, and Markdown retain sufficient contrast in both modes.',
