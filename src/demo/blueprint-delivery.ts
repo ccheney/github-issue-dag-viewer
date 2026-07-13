@@ -120,7 +120,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
       'security-boundary',
       'domain-tests',
     ],
-    completed: false,
+    completed: true,
     outcome:
       'Verify the remote data boundary without depending on live GitHub during the unit suite.',
     scope: [

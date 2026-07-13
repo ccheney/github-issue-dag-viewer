@@ -47,7 +47,7 @@ const ISSUE_DETAILS_QUERY = `
 
 interface GraphQlEnvelope {
   data?: unknown
-  errors?: Array<{ message?: string }>
+  errors?: unknown[]
 }
 
 export class GitHubGraphQlError extends Error {
@@ -77,13 +77,21 @@ const request = async <T>(
     ...(signal === undefined ? {} : { signal }),
   })
 
-  const envelope = (await response.json()) as GraphQlEnvelope
-  const apiMessage = envelope.errors
-    ?.map(({ message }) => message)
-    .filter(Boolean)
-    .join(' · ')
-  if (!response.ok || envelope.data === undefined || apiMessage) {
-    throw new GitHubGraphQlError(apiMessage ?? `GitHub returned HTTP ${response.status}.`)
+  let envelope: GraphQlEnvelope
+  try {
+    envelope = (await response.json()) as GraphQlEnvelope
+  } catch {
+    throw new GitHubGraphQlError(
+      response.ok
+        ? 'GitHub returned an unexpected GraphQL response.'
+        : `GitHub returned HTTP ${response.status}.`,
+    )
+  }
+  if (!response.ok) {
+    throw new GitHubGraphQlError(`GitHub returned HTTP ${response.status}.`)
+  }
+  if (envelope.data === undefined || (envelope.errors?.length ?? 0) > 0) {
+    throw new GitHubGraphQlError('GitHub rejected the GraphQL request.')
   }
 
   const result = schema.safeParse(envelope.data)
@@ -162,8 +170,12 @@ export const fetchRepositorySnapshot = async (
       rateLimit: page.rateLimit,
     }
     onProgress({ loaded: issues.length, total: connection.totalCount })
-    cursor = connection.pageInfo.endCursor
+    const nextCursor = connection.pageInfo.endCursor
     hasNextPage = connection.pageInfo.hasNextPage
+    if (hasNextPage && (nextCursor === null || nextCursor === cursor)) {
+      throw new GitHubGraphQlError('GitHub returned invalid pagination metadata.')
+    }
+    cursor = nextCursor
   }
 
   if (metadata === null) {
