@@ -7,7 +7,7 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
 
   await expect(page).toHaveTitle('Issue Atlas · GitHub dependency explorer')
   await expect(
-    page.getByRole('heading', { name: 'Run strict quality gates in GitHub Actions' }),
+    page.getByRole('heading', { name: 'Deploy the static application to GitHub Pages' }),
   ).toBeVisible()
 
   const issueList = page.getByRole('list', { name: 'Filtered issues' })
@@ -29,7 +29,7 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await page.getByLabel('Readiness').selectOption('ready')
   await expect(issueList.getByRole('button')).toHaveCount(1)
   await expect(
-    issueList.getByRole('button', { name: /Run strict quality gates in GitHub Actions/ }),
+    issueList.getByRole('button', { name: /Deploy the static application to GitHub Pages/ }),
   ).toBeVisible()
 
   const horizontal = page.getByRole('button', { name: 'Use left-to-right layout' })

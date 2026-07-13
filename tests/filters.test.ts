@@ -27,7 +27,7 @@ describe('issue filters', () => {
       showExternal: true,
     })
 
-    expect([...results].toSorted()).toEqual(['ccheney/github-issue-dag-viewer#29'])
+    expect([...results].toSorted()).toEqual(['ccheney/github-issue-dag-viewer#30'])
   })
 
   it('returns a stable sorted label catalog', () => {

@@ -156,7 +156,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     title: 'Run strict quality gates in GitHub Actions',
     area: 'area:delivery',
     dependencies: ['quality-config', 'domain-tests', 'graphql-tests', 'browser-tests'],
-    completed: false,
+    completed: true,
     outcome: 'Prevent unverified source from reaching the Pages deployment branch.',
     scope: [
       'Install the pinned Bun toolchain and run formatting, linting, types, unit tests, browser tests, and build.',
