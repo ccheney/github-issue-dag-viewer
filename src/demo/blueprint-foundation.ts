@@ -10,7 +10,7 @@ export const foundationTasks: readonly BlueprintTask[] = [
     outcome:
       'Define a repository-agnostic issue dependency viewer with an explicit browser trust boundary.',
     scope: [
-      'Accept any github.com repository URL while keeping the product independent of Lingora.',
+      'Accept any github.com repository URL without repository-specific behavior.',
       'Keep credentials ephemeral and send them only to the GitHub GraphQL endpoint.',
     ],
     acceptance:

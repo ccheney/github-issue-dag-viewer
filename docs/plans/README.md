@@ -4,9 +4,11 @@ These plans define a repository-agnostic GitHub issue dependency explorer. The a
 
 The plans capture the decisions behind the implementation and the remaining delivery work. The repository's own issues are the executable dependency graph for these plans, and the zero-token demo is an offline projection of that graph.
 
+For clean-clone setup, local usage, token permissions, verification commands, deployment, and known limits, use the [contributor and operations guide](../contributor-guide.md).
+
 ## Fixed decisions
 
-- Build a generic viewer that is not tied to Lingora or any other source repository.
+- Build a repository-agnostic viewer for any supported GitHub repository.
 - Deploy a static single-page application to GitHub Pages; do not introduce an application backend.
 - Call `api.github.com/graphql` directly with a token supplied by the user.
 - Keep the token in tab memory only. Never place it in storage, URLs, logs, exports, source, or generated assets.

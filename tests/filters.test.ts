@@ -28,11 +28,11 @@ describe('issue filters', () => {
       query: '',
       state: 'open',
       readiness: 'ready',
-      labels: new Set(['area:docs']),
+      labels: new Set(['area:quality']),
       showExternal: true,
     })
 
-    expect([...results].toSorted()).toEqual(['ccheney/github-issue-dag-viewer#31'])
+    expect([...results].toSorted()).toEqual(['ccheney/github-issue-dag-viewer#35'])
   })
 
   it('parses GitHub-style qualifiers without treating them as search text', () => {
@@ -60,7 +60,7 @@ describe('issue filters', () => {
   })
 
   it('filters directly from GitHub-style qualifiers', () => {
-    const query = 'is:issue state:open is:ready label:"area:docs"'
+    const query = 'is:issue state:open is:ready label:"area:quality"'
     const parsed = parseFilterQuery(query)
     const results = filterIssueKeys(analysis, {
       query,
@@ -70,7 +70,7 @@ describe('issue filters', () => {
       showExternal: parsed.showExternal,
     })
 
-    expect([...results]).toEqual(['ccheney/github-issue-dag-viewer#31'])
+    expect([...results]).toEqual(['ccheney/github-issue-dag-viewer#35'])
   })
 
   it('returns a stable sorted label catalog', () => {

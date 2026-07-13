@@ -78,11 +78,11 @@ Breadth-first traversal over incoming adjacency returns every transitive upstrea
 - Label selection uses inclusive-any matching among selected labels.
 - External-node visibility is independent of other filters.
 
-Filtering changes the rendered subgraph and issue list. Analysis statistics describe the full loaded snapshot so filtering cannot silently redefine repository health.
+Filtering changes the visible subgraph and issue list. Analysis statistics describe the full loaded snapshot so filtering cannot silently redefine repository health.
 
 ## Rendering adapter
 
-Cytoscape receives only nodes and edges whose endpoints both pass the current filter. Dagre lays out the resulting directed graph left-to-right or top-to-bottom. The adapter owns canvas lifecycle, layout, zoom, pan, selection, focus classes, fitting, and PNG output; it does not own graph semantics.
+Cytoscape receives the full repository topology and Dagre lays it out left-to-right or top-to-bottom. Filters hide or show existing nodes and edges without rebuilding the topology or rerunning layout. The adapter owns canvas lifecycle, layout, zoom, pan, selection, focus classes, fitting, and PNG output; it does not own graph semantics.
 
 Semantic node states:
 

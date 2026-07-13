@@ -6,6 +6,8 @@ Verify graph correctness, browser behavior, credential boundaries, static delive
 
 ## Local command contract
 
+The [contributor and operations guide](../contributor-guide.md) is the clean-clone runbook for these commands, live repository access, exports, and deployment.
+
 | Command | Responsibility |
 | --- | --- |
 | `bun install` | Install exact locked dependencies |

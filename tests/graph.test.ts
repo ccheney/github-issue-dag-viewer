@@ -42,10 +42,10 @@ describe('analyzeGraph', () => {
   it('analyzes the complex demo graph', () => {
     const graph = analyzeGraph(demoSnapshot.issues)
 
-    expect(graph.stats).toMatchObject({ total: 39, open: 6, closed: 33, ready: 3, cycles: 0 })
+    expect(graph.stats).toMatchObject({ total: 39, open: 4, closed: 35, ready: 2, cycles: 0 })
     expect(graph.edges).toHaveLength(116)
     expect(graph.layers).toHaveLength(24)
-    expect(graph.criticalPath).toHaveLength(4)
+    expect(graph.criticalPath).toHaveLength(3)
   })
 
   it('deduplicates relationships reported from both ends', () => {

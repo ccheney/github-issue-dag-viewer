@@ -184,7 +184,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     title: 'Document setup, token permissions, privacy, and deployment',
     area: 'area:docs',
     dependencies: ['scope', 'security-boundary', 'exports', 'pages-workflow'],
-    completed: false,
+    completed: true,
     outcome: 'Make the project understandable and safely operable from a clean clone.',
     scope: [
       'Document the architecture, development commands, graph semantics, exports, and Pages workflow.',
@@ -228,7 +228,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     title: 'Load the repository’s own live dependency graph',
     area: 'area:quality',
     dependencies: ['graphql-tests', 'pages-workflow', 'live-blueprint'],
-    completed: false,
+    completed: true,
     outcome: 'Use the production application against its own native GitHub issue DAG.',
     scope: [
       'Load ccheney/github-issue-dag-viewer through the same arbitrary repository flow users receive.',
