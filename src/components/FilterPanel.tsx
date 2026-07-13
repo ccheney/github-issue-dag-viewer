@@ -1,6 +1,6 @@
 import { FilterIcon, SearchIcon, TriangleDownIcon, XIcon } from '@primer/octicons-react'
 import { ActionList, ActionMenu, Button, Checkbox, FormControl, TextInput } from '@primer/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { formatFilterQuery, parseFilterQuery } from '../domain/filters'
 import type { GraphFilters, IssueStateFilter, ReadinessFilter } from '../domain/types'
 
@@ -41,6 +41,7 @@ export const FilterPanel = ({
 }: FilterPanelProps): React.JSX.Element => {
   const [labelsOpen, setLabelsOpen] = useState(false)
   const [labelSearch, setLabelSearch] = useState('')
+  const [queryDraft, setQueryDraft] = useState(filters.query)
   const parsedQuery = parseFilterQuery(filters.query)
   const hasFilters =
     parsedQuery.text.length > 0 ||
@@ -49,17 +50,40 @@ export const FilterPanel = ({
     filters.labels.size > 0 ||
     !filters.showExternal
 
-  const applyFilters = (next: GraphFilters): void =>
-    onChange({ ...next, query: formatFilterQuery(next) })
+  useEffect(() => setQueryDraft(filters.query), [filters.query])
 
-  const clear = (): void =>
-    onChange({
+  useEffect(() => {
+    if (queryDraft === filters.query) return
+    const timeout = window.setTimeout(() => {
+      const parsed = parseFilterQuery(queryDraft)
+      onChange({
+        query: queryDraft,
+        state: parsed.state,
+        readiness: parsed.readiness,
+        labels: parsed.labels,
+        showExternal: parsed.showExternal,
+      })
+    }, 200)
+    return () => window.clearTimeout(timeout)
+  }, [filters.query, onChange, queryDraft])
+
+  const applyFilters = (next: GraphFilters): void => {
+    const query = formatFilterQuery(next)
+    setQueryDraft(query)
+    onChange({ ...next, query })
+  }
+
+  const clear = (): void => {
+    const next: GraphFilters = {
       query: 'is:issue',
       state: 'all',
       readiness: 'all',
       labels: new Set(),
       showExternal: true,
-    })
+    }
+    setQueryDraft(next.query)
+    onChange(next)
+  }
 
   const visibleLabels = labels.filter((label) =>
     label.toLocaleLowerCase().includes(labelSearch.toLocaleLowerCase()),
@@ -87,19 +111,9 @@ export const FilterPanel = ({
         block
         className="github-filter-input"
         leadingVisual={SearchIcon}
-        onChange={(event) => {
-          const query = event.currentTarget.value
-          const parsed = parseFilterQuery(query)
-          onChange({
-            query,
-            state: parsed.state,
-            readiness: parsed.readiness,
-            labels: parsed.labels,
-            showExternal: parsed.showExternal,
-          })
-        }}
+        onChange={(event) => setQueryDraft(event.currentTarget.value)}
         placeholder="Search or filter issues"
-        value={filters.query}
+        value={queryDraft}
       />
 
       <div className="filter-menu-row">

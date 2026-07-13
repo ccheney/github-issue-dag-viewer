@@ -65,7 +65,6 @@ export default function App(): React.JSX.Element {
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(demoSnapshot)
   const [source, setSource] = useState<'demo' | 'github'>('demo')
   const [filters, setFilters] = useState<GraphFilters>(initialFilters)
-  const [filterRevision, setFilterRevision] = useState(0)
   const [selectedKey, setSelectedKey] = useState<string | null>(() =>
     selectInitialIssue(demoSnapshot),
   )
@@ -87,10 +86,6 @@ export default function App(): React.JSX.Element {
   const selectIssue = (key: string): void => {
     setSelectedKey(key)
     setInspectorOpen(true)
-  }
-  const updateFilters = (nextFilters: GraphFilters): void => {
-    setFilters(nextFilters)
-    setFilterRevision((revision) => revision + 1)
   }
 
   useEffect(() => {
@@ -209,7 +204,7 @@ export default function App(): React.JSX.Element {
             <FilterPanel
               filters={filters}
               labels={labels}
-              onChange={updateFilters}
+              onChange={setFilters}
               onClose={() => setIssuesOpen(false)}
               resultCount={visibleKeys.size}
             />
@@ -224,7 +219,6 @@ export default function App(): React.JSX.Element {
             analysis={analysis}
             colorMode={colorMode}
             direction={direction}
-            fitRevision={filterRevision}
             issueKeys={visibleKeys}
             onDirectionChange={setDirection}
             onOpenInspector={() => setInspectorOpen(true)}

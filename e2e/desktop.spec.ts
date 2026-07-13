@@ -77,6 +77,10 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await vertical.click()
   await expect(vertical).toHaveAttribute('aria-pressed', 'true')
   await expect(horizontal).toHaveAttribute('aria-pressed', 'false')
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(issueList.getByRole('button')).toHaveCount(1)
+  await expect(page.locator(`[data-render-marker="${graphRenderMarker}"]`)).toHaveCount(1)
+  await page.emulateMedia({ colorScheme: 'light' })
 
   const jsonDownload = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Export' }).click()

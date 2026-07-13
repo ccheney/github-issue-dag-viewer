@@ -22,7 +22,6 @@ interface GraphCanvasProps {
   analysis: GraphAnalysis
   colorMode: ColorMode
   direction: LayoutDirection
-  fitRevision: number
   issueKeys: ReadonlySet<string>
   selectedKey: string | null
   onDirectionChange: (direction: LayoutDirection) => void
@@ -139,15 +138,11 @@ const graphStyles = (mode: ColorMode): StylesheetJson => {
   ]
 }
 
-const graphElements = (
-  analysis: GraphAnalysis,
-  issueKeys: ReadonlySet<string>,
-): ElementDefinition[] => {
+const graphElements = (analysis: GraphAnalysis): ElementDefinition[] => {
   const cycleKeys = new Set(analysis.cycles.flat())
   const criticalKeys = new Set(analysis.criticalPath)
-  const nodes: ElementDefinition[] = [...issueKeys].flatMap((key) => {
-    const issue = analysis.nodes.get(key)
-    if (issue === undefined) return []
+  const nodes: ElementDefinition[] = [...analysis.nodes.values()].map((issue) => {
+    const key = issue.key
     const classes = [
       issue.state.toLocaleLowerCase(),
       analysis.ready.has(key) ? 'ready' : '',
@@ -155,18 +150,32 @@ const graphElements = (
       cycleKeys.has(key) ? 'cyclic' : '',
       criticalKeys.has(key) ? 'critical' : '',
     ].filter(Boolean)
-    return [
-      { data: { id: key, label: `#${issue.number}  ${issue.title}` }, classes: classes.join(' ') },
-    ]
+    return {
+      data: { id: key, label: `#${issue.number}  ${issue.title}` },
+      classes: classes.join(' '),
+    }
   })
-  const edges: ElementDefinition[] = analysis.edges
-    .filter(({ source, target }) => issueKeys.has(source) && issueKeys.has(target))
-    .map(({ id, source, target }) => ({ data: { id, source, target } }))
+  const edges: ElementDefinition[] = analysis.edges.map(({ id, source, target }) => ({
+    data: { id, source, target },
+  }))
   return [...nodes, ...edges]
+}
+
+const setGraphVisibility = (cy: Core, issueKeys: ReadonlySet<string>): void => {
+  cy.batch(() => {
+    cy.nodes().forEach((node) => {
+      node.style('display', issueKeys.has(node.id()) ? 'element' : 'none')
+    })
+    cy.edges().forEach((edge) => {
+      const visible = issueKeys.has(edge.source().id()) && issueKeys.has(edge.target().id())
+      edge.style('display', visible ? 'element' : 'none')
+    })
+  })
 }
 
 const focusSelection = (cy: Core, analysis: GraphAnalysis, selectedKey: string | null): void => {
   cy.elements().removeClass('dimmed upstream downstream focused')
+  cy.nodes().unselect()
   if (selectedKey === null || cy.getElementById(selectedKey).empty()) return
   const upstream = relatedNodes(selectedKey, analysis.incoming)
   const downstream = relatedNodes(selectedKey, analysis.outgoing)
@@ -196,7 +205,8 @@ const downloadPng = (cy: Core): void => {
 }
 
 const fitGraph = (cy: Core): void => {
-  if (cy.nodes().length > 0) cy.fit(cy.elements(), 48)
+  const visible = cy.elements(':visible')
+  if (visible.nodes().length > 0) cy.fit(visible, 48)
 }
 
 const centerGraph = (cy: Core, selectedKey: string | null): void => {
@@ -226,7 +236,6 @@ export const GraphCanvas = ({
   analysis,
   colorMode,
   direction,
-  fitRevision,
   issueKeys,
   selectedKey,
   onDirectionChange,
@@ -236,21 +245,24 @@ export const GraphCanvas = ({
 }: GraphCanvasProps): React.JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null)
   const cyRef = useRef<Core | null>(null)
-  const fitRevisionRef = useRef(fitRevision)
   const directionRef = useRef(direction)
   const elementsSignatureRef = useRef('')
   const onSelectRef = useRef(onSelect)
   const selectedKeyRef = useRef(selectedKey)
+  const issueKeysRef = useRef(issueKeys)
   onSelectRef.current = onSelect
   selectedKeyRef.current = selectedKey
-  const elements = useMemo(() => graphElements(analysis, issueKeys), [analysis, issueKeys])
+  issueKeysRef.current = issueKeys
+  const elements = useMemo(() => graphElements(analysis), [analysis])
   const elementsSignature = useMemo(() => JSON.stringify(elements), [elements])
+  const visibleKeysSignature = useMemo(() => [...issueKeys].toSorted().join('\u0000'), [issueKeys])
+  const visibleKeysSignatureRef = useRef(visibleKeysSignature)
   const initialGraphRef = useRef({
     colorMode,
     direction,
     elements,
     elementsSignature,
-    fitRevision,
+    issueKeys,
   })
 
   useEffect(() => {
@@ -258,7 +270,6 @@ export const GraphCanvas = ({
     const initial = initialGraphRef.current
     elementsSignatureRef.current = initial.elementsSignature
     directionRef.current = initial.direction
-    fitRevisionRef.current = initial.fitRevision
     const cy = cytoscape({
       container: containerRef.current,
       elements: initial.elements,
@@ -267,6 +278,7 @@ export const GraphCanvas = ({
       maxZoom: 2.5,
     })
     cyRef.current = cy
+    setGraphVisibility(cy, initial.issueKeys)
     cy.on('tap', 'node', (event) => onSelectRef.current(event.target.id()))
     runLayout(cy, initial.direction, (graph) => centerGraph(graph, selectedKeyRef.current))
     return () => {
@@ -284,13 +296,10 @@ export const GraphCanvas = ({
     if (cy === null) return
     const elementsChanged = elementsSignatureRef.current !== elementsSignature
     const directionChanged = directionRef.current !== direction
-    const shouldFit = fitRevisionRef.current !== fitRevision
     elementsSignatureRef.current = elementsSignature
     directionRef.current = direction
-    fitRevisionRef.current = fitRevision
 
     if (!elementsChanged && !directionChanged) {
-      if (shouldFit) fitGraph(cy)
       return
     }
 
@@ -298,12 +307,22 @@ export const GraphCanvas = ({
     if (elementsChanged) {
       cy.elements().remove()
       cy.add(elements)
+      setGraphVisibility(cy, issueKeysRef.current)
     }
     runLayout(cy, direction, (graph) => {
-      if (shouldFit || directionChanged) fitGraph(graph)
+      if (directionChanged) fitGraph(graph)
       else centerGraph(graph, selectedKeyRef.current)
     })
-  }, [direction, elements, elementsSignature, fitRevision])
+  }, [direction, elements, elementsSignature])
+
+  useEffect(() => {
+    if (visibleKeysSignatureRef.current === visibleKeysSignature) return
+    visibleKeysSignatureRef.current = visibleKeysSignature
+    const cy = cyRef.current
+    if (cy === null) return
+    setGraphVisibility(cy, issueKeysRef.current)
+    fitGraph(cy)
+  }, [visibleKeysSignature])
 
   useEffect(() => {
     const cy = cyRef.current
@@ -374,7 +393,10 @@ export const GraphCanvas = ({
           <Button
             aria-label="Fit graph to viewport"
             leadingVisual={ScreenFullIcon}
-            onClick={() => cyRef.current?.fit(undefined, 48)}
+            onClick={() => {
+              const cy = cyRef.current
+              if (cy !== null) fitGraph(cy)
+            }}
             size="small"
             variant="invisible"
           >
