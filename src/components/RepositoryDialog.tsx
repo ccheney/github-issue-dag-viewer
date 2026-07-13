@@ -1,6 +1,9 @@
 import { KeyIcon, MarkGithubIcon, RepoIcon } from '@primer/octicons-react'
-import { Button, Flash, FormControl, TextInput } from '@primer/react'
+import { Button, Flash, FormControl, Link, TextInput } from '@primer/react'
 import { useEffect, useRef, useState } from 'react'
+
+const TOKEN_TEMPLATE_URL =
+  'https://github.com/settings/personal-access-tokens/new?name=Issue%20Atlas&description=Read%20issue%20dependency%20graphs&expires_in=30&issues=read'
 
 interface RepositoryDialogProps {
   open: boolean
@@ -84,8 +87,11 @@ export const RepositoryDialog = ({
             value={token}
           />
           <FormControl.Caption>
-            Kept only in this tab’s memory. It is never stored, logged, added to the URL, or sent
-            anywhere except api.github.com.
+            <Link href={TOKEN_TEMPLATE_URL} rel="noopener noreferrer" target="_blank">
+              Create a fine-grained read-only token
+            </Link>
+            , choose repository access, then paste it here. The token stays only in this tab’s
+            memory and is sent only to api.github.com.
           </FormControl.Caption>
         </FormControl>
 

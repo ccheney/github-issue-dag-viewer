@@ -97,6 +97,14 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await page.keyboard.press('Enter')
   const dialog = page.getByRole('dialog', { name: 'Open an issue dependency graph' })
   await expect(dialog).toBeVisible()
+  const tokenTemplate = dialog.getByRole('link', {
+    name: 'Create a fine-grained read-only token',
+  })
+  await expect(tokenTemplate).toHaveAttribute(
+    'href',
+    'https://github.com/settings/personal-access-tokens/new?name=Issue%20Atlas&description=Read%20issue%20dependency%20graphs&expires_in=30&issues=read',
+  )
+  await expect(tokenTemplate).toHaveAttribute('target', '_blank')
   const token = dialog.getByLabel('Read-only GitHub token')
   await token.fill('temporary-test-token')
   await dialog.getByRole('button', { name: 'Explore demo' }).click()
