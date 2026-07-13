@@ -1,0 +1,51 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+  "files": {
+    "includes": ["**", "!!dist", "!!coverage", "!!playwright-report", "!!test-results"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded",
+      "trailingCommas": "all"
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": false
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": { "maxAllowedComplexity": 20 }
+        },
+        "noExcessiveLinesPerFunction": {
+          "level": "error",
+          "options": { "maxLines": 160, "skipBlankLines": true }
+        }
+      },
+      "suspicious": {
+        "noExplicitAny": "error"
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}
