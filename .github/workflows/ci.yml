@@ -37,6 +37,16 @@ jobs:
       - name: Verify repository
         run: bun run verify
 
+      - name: Configure GitHub Pages
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
       - name: Upload browser diagnostics
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -47,3 +57,20 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 14
+
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
