@@ -1,0 +1,98 @@
+.graph-workspace {
+  position: relative;
+  display: grid;
+  grid-template-rows: 44px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--bgColor-default, #fff);
+  background-image: radial-gradient(var(--borderColor-muted, #d8dee4) 0.65px, transparent 0.65px);
+  background-size: 15px 15px;
+}
+
+.graph-toolbar {
+  z-index: 3;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 6px 10px 6px 14px;
+  background: color-mix(in srgb, var(--bgColor-default, #fff) 94%, transparent);
+  border-bottom: 1px solid var(--borderColor-muted, #d8dee4);
+  backdrop-filter: blur(8px);
+}
+
+.graph-legend,
+.graph-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.graph-legend {
+  color: var(--fgColor-muted, #59636e);
+  font-size: 11px;
+}
+
+.graph-legend span {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: 2px solid;
+  border-radius: 50%;
+}
+
+.legend-ready {
+  background: var(--bgColor-accent-muted, #ddf4ff);
+  border-color: var(--borderColor-accent-emphasis, #0969da);
+}
+
+.legend-open {
+  border-color: var(--borderColor-success-emphasis, #1f883d);
+}
+
+.legend-closed {
+  border-color: var(--borderColor-done-emphasis, #8250df);
+}
+
+.legend-line {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 1px;
+  background: var(--fgColor-muted, #59636e);
+}
+
+.legend-line::after {
+  position: absolute;
+  top: -2px;
+  right: -1px;
+  width: 0;
+  height: 0;
+  content: "";
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 4px solid var(--fgColor-muted, #59636e);
+}
+
+.graph-actions {
+  gap: 2px;
+}
+
+.graph-canvas {
+  min-width: 0;
+  min-height: 0;
+  outline: none;
+}
+
+.graph-canvas:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--focus-outlineColor, #0969da);
+}

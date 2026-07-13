@@ -1,0 +1,140 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bgColor-default, #fff);
+  color: var(--fgColor-default, #1f2328);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+a {
+  color: var(--fgColor-accent, #0969da);
+}
+
+.app-root {
+  display: grid;
+  grid-template-rows: 64px 38px minmax(0, 1fr);
+  height: 100dvh;
+  min-height: 0;
+}
+
+.muted {
+  color: var(--fgColor-muted, #59636e);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.issue-state-open {
+  color: var(--fgColor-open, #1f883d);
+}
+
+.issue-state-ready {
+  color: var(--fgColor-accent, #0969da);
+}
+
+.issue-state-closed {
+  color: var(--fgColor-done, #8250df);
+}
+
+.markdown-body {
+  color: var(--fgColor-default, #1f2328);
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--borderColor-muted, #d8dee4);
+}
+
+.markdown-body h1 {
+  font-size: 1.55em;
+}
+
+.markdown-body h2 {
+  margin-top: 24px;
+  font-size: 1.3em;
+}
+
+.markdown-body h3 {
+  margin-top: 20px;
+  font-size: 1.1em;
+}
+
+.markdown-body pre,
+.markdown-body code {
+  border-radius: 6px;
+  background: var(--bgColor-muted, #f6f8fa);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.markdown-body code {
+  padding: 0.2em 0.4em;
+  font-size: 85%;
+}
+
+.markdown-body pre {
+  padding: 12px;
+  overflow: auto;
+}
+
+.markdown-body pre code {
+  padding: 0;
+}
+
+.markdown-body blockquote {
+  padding-left: 1em;
+  margin-left: 0;
+  color: var(--fgColor-muted, #59636e);
+  border-left: 0.25em solid var(--borderColor-default, #d0d7de);
+}
+
+.markdown-body table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-collapse: collapse;
+}
+
+.markdown-body th,
+.markdown-body td {
+  padding: 6px 10px;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+}
+
+.markdown-body img {
+  max-width: 100%;
+}

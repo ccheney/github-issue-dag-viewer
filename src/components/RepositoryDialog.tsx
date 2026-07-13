@@ -1,0 +1,103 @@
+import { KeyIcon, MarkGithubIcon, RepoIcon } from '@primer/octicons-react'
+import { Button, Flash, FormControl, TextInput } from '@primer/react'
+import { useEffect, useRef, useState } from 'react'
+
+interface RepositoryDialogProps {
+  open: boolean
+  initialRepository: string
+  loading: boolean
+  error: string | null
+  onClose: () => void
+  onConnect: (repository: string, token: string) => void
+  onDemo: () => void
+}
+
+export const RepositoryDialog = ({
+  open,
+  initialRepository,
+  loading,
+  error,
+  onClose,
+  onConnect,
+  onDemo,
+}: RepositoryDialogProps): React.JSX.Element => {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const [repository, setRepository] = useState(initialRepository)
+  const [token, setToken] = useState('')
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (dialog === null) return
+    if (open && !dialog.open) dialog.showModal()
+    if (!open && dialog.open) dialog.close()
+    if (!open) setToken('')
+  }, [open])
+
+  const submit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault()
+    onConnect(repository, token)
+  }
+
+  return (
+    <dialog
+      aria-labelledby="repository-dialog-title"
+      className="repository-dialog"
+      onCancel={(event) => {
+        event.preventDefault()
+        onClose()
+      }}
+      ref={dialogRef}
+    >
+      <form onSubmit={submit}>
+        <div className="dialog-mark">
+          <MarkGithubIcon size={36} />
+        </div>
+        <h1 id="repository-dialog-title">Open an issue dependency graph</h1>
+        <p>
+          Enter any <strong>github.com</strong> repository. Issue Atlas reads native issue
+          dependency relationships directly from GitHub GraphQL.
+        </p>
+
+        {error === null ? null : <Flash variant="danger">{error}</Flash>}
+
+        <FormControl required>
+          <FormControl.Label>Repository</FormControl.Label>
+          <TextInput
+            autoComplete="off"
+            block
+            leadingVisual={RepoIcon}
+            onChange={(event) => setRepository(event.currentTarget.value)}
+            placeholder="https://github.com/owner/repository"
+            value={repository}
+          />
+        </FormControl>
+
+        <FormControl required>
+          <FormControl.Label>Read-only GitHub token</FormControl.Label>
+          <TextInput
+            autoComplete="off"
+            block
+            leadingVisual={KeyIcon}
+            onChange={(event) => setToken(event.currentTarget.value)}
+            placeholder="github_pat_… or ghp_…"
+            type="password"
+            value={token}
+          />
+          <FormControl.Caption>
+            Kept only in this tab’s memory. It is never stored, logged, added to the URL, or sent
+            anywhere except api.github.com.
+          </FormControl.Caption>
+        </FormControl>
+
+        <div className="dialog-actions">
+          <Button disabled={loading} onClick={onDemo} type="button" variant="invisible">
+            Explore demo
+          </Button>
+          <Button disabled={loading} type="submit" variant="primary">
+            {loading ? 'Loading issues…' : 'Load repository'}
+          </Button>
+        </div>
+      </form>
+    </dialog>
+  )
+}
