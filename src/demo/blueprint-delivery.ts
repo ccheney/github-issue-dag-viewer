@@ -242,7 +242,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     title: 'Verify desktop and mobile layouts in light and dark modes',
     area: 'area:quality',
     dependencies: ['color-modes', 'responsive-shell', 'browser-tests', 'live-dogfood'],
-    completed: false,
+    completed: true,
     outcome: 'Validate the GitHub-inspired interface across the intended visual matrix.',
     scope: [
       'Inspect representative desktop, tablet, and phone viewports in both color modes.',

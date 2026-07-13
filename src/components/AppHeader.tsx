@@ -43,7 +43,12 @@ export const AppHeader = ({
       </div>
 
       <nav className="header-actions" aria-label="Application controls">
-        <Button leadingVisual={DownloadIcon} onClick={onExport} variant="invisible">
+        <Button
+          aria-label="Export"
+          leadingVisual={DownloadIcon}
+          onClick={onExport}
+          variant="invisible"
+        >
           Export
         </Button>
         <Button leadingVisual={KeyIcon} onClick={onChangeRepository}>

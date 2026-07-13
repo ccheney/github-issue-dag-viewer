@@ -7,8 +7,16 @@ test('keeps issue and detail panels operable on a phone', async ({ page }) => {
 
   const issuesButton = page.getByRole('button', { name: 'Issues' })
   const detailsButton = page.getByRole('button', { name: 'Details' })
+  const exportButton = page.getByRole('button', { name: 'Export' })
   await expect(issuesButton).toBeVisible()
   await expect(detailsButton).toBeVisible()
+  await expect(exportButton).toBeVisible()
+
+  const jsonDownload = page.waitForEvent('download')
+  await exportButton.click()
+  await expect((await jsonDownload).suggestedFilename()).toBe(
+    'github-issue-dag-viewer-issue-dependencies.json',
+  )
 
   const issuesPanel = page.getByRole('region', { name: 'Issues' })
   await issuesButton.click()
@@ -17,7 +25,7 @@ test('keeps issue and detail panels operable on a phone', async ({ page }) => {
   await expect(issuesPanel).toBeHidden()
 
   await detailsButton.click()
-  const inspector = page.getByRole('complementary', { name: 'Issue #35 details' })
+  const inspector = page.getByRole('complementary', { name: 'Issue #37 details' })
   await expect(inspector).toBeVisible()
   await inspector.getByRole('button', { name: 'Close issue details' }).click()
   await expect(inspector).toBeHidden()

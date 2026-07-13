@@ -21,8 +21,7 @@
   }
 
   .brand-description,
-  .source-badge,
-  .header-actions button:first-child {
+  .source-badge {
     display: none;
   }
 
@@ -69,8 +68,13 @@
     font-size: 14px;
   }
 
-  .repository-crumb > svg,
-  .repository-links {
+  .app-header {
+    grid-template-columns: auto 1fr auto;
+    gap: 6px;
+    padding: 0 8px;
+  }
+
+  .repository-crumb {
     display: none;
   }
 
