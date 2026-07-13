@@ -295,7 +295,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
       'large-graph-benchmark',
       'bundle-performance',
     ],
-    completed: false,
+    completed: true,
     outcome: 'Cut a reproducible first release after the blueprint’s delivery gates are complete.',
     scope: [
       'Verify the release commit, Pages deployment, live example DAG, documentation, and known limitations.',
