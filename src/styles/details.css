@@ -93,6 +93,7 @@
 .relationship-section a {
   display: -webkit-box;
   overflow: hidden;
+  padding-block: 4px;
   color: var(--fgColor-default, #1f2328);
   line-height: 1.35;
   text-decoration: none;
