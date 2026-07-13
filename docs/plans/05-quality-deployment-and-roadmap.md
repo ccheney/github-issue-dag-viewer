@@ -116,6 +116,8 @@ Add Safari and Firefox manual checks before the first tagged release because can
 
 ## Performance program
 
+The current reference measurements and first-release budgets are recorded in [the large-graph benchmark](../performance/large-graph-benchmark.md).
+
 Generate deterministic 1,000-node and 5,000-node fixtures with sparse chains, wide fan-out, and fan-in. Measure:
 
 - Snapshot transformation time.

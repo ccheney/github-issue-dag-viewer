@@ -256,7 +256,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     title: 'Benchmark repositories with thousands of issues',
     area: 'area:performance',
     dependencies: ['pagination', 'topology', 'cycles', 'graph-canvas', 'domain-tests'],
-    completed: false,
+    completed: true,
     outcome: 'Measure the practical limits of ingestion, analysis, layout, and interaction.',
     scope: [
       'Generate representative 1,000-node and 5,000-node sparse and fan-out graphs.',

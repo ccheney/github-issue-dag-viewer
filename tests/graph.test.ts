@@ -42,7 +42,7 @@ describe('analyzeGraph', () => {
   it('analyzes the complex demo graph', () => {
     const graph = analyzeGraph(demoSnapshot.issues)
 
-    expect(graph.stats).toMatchObject({ total: 38, open: 9, closed: 29, ready: 2, cycles: 0 })
+    expect(graph.stats).toMatchObject({ total: 38, open: 8, closed: 30, ready: 1, cycles: 0 })
     expect(graph.edges).toHaveLength(115)
     expect(graph.layers).toHaveLength(23)
     expect(graph.criticalPath).toHaveLength(6)
