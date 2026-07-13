@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { issueNode, repositoryPage } from '../tests/github-client-fixtures'
 import { captureBrowserErrors, expectNoAccessibilityViolations } from './support'
 
 test('completes the zero-token desktop workflow', async ({ page }) => {
@@ -132,5 +133,54 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await expect(dialog).toBeHidden()
 
   await expectNoAccessibilityViolations(page)
+  expect(browserErrors).toEqual([])
+})
+
+test('publishes page progress and warns before a large repository finishes', async ({ page }) => {
+  const browserErrors = captureBrowserErrors(page)
+  const secondPageRequested = Promise.withResolvers<void>()
+  const releaseSecondPage = Promise.withResolvers<void>()
+
+  await page.route('https://api.github.com/graphql', async (route) => {
+    const request = route.request().postDataJSON() as {
+      variables: { cursor: string | null }
+    }
+    if (request.variables.cursor === null) {
+      await route.fulfill({
+        json: repositoryPage({
+          nodes: [issueNode(1)],
+          totalCount: 5_001,
+          hasNextPage: true,
+          endCursor: 'cursor-1',
+        }),
+      })
+      return
+    }
+
+    secondPageRequested.resolve()
+    await releaseSecondPage.promise
+    await route.fulfill({ json: { errors: [{ message: 'Stop the test load.' }] } })
+  })
+
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Open repository' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Open an issue dependency graph' })
+  await dialog.getByLabel('Repository').fill('https://github.com/octo-org/roadmap')
+  await dialog.getByLabel('Read-only GitHub token').fill('temporary-test-token')
+  await dialog.getByRole('button', { name: 'Load repository' }).click()
+  await secondPageRequested.promise
+
+  await expect(dialog).toBeHidden()
+  await expect(page.locator('.source-loading')).toHaveText('Loading')
+  await expect(page.locator('.load-overlay')).toContainText('1 of 5,001 issues')
+  await expect(page.getByRole('button', { name: /Issue 1 #1/ })).toBeVisible()
+  await expect(page.getByText('Canvas unavailable for 5,001 issues', { exact: true })).toBeVisible()
+  await expect(page.getByRole('progressbar', { name: 'Repository load progress' })).toHaveCount(2)
+  await expect(page.getByRole('button', { name: 'Export' })).toBeDisabled()
+  await expectNoAccessibilityViolations(page)
+
+  releaseSecondPage.resolve()
+  await expect(dialog).toBeVisible()
+  await expect(dialog).toContainText('GitHub rejected the GraphQL request.')
   expect(browserErrors).toEqual([])
 })

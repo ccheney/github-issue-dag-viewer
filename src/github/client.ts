@@ -1,5 +1,5 @@
 import type { ZodType } from 'zod'
-import type { LoadProgress, RepositoryRef, RepositorySnapshot } from '../domain/types'
+import type { RepositoryLoadUpdate, RepositoryRef, RepositorySnapshot } from '../domain/types'
 import { type DependencyRef, type IssueRecord, issueKey } from '../domain/types'
 import { issueDetailsSchema, type RepositoryPageResponse, repositoryPageSchema } from './schemas'
 
@@ -134,13 +134,14 @@ const issueRecord = (
 export const fetchRepositorySnapshot = async (
   repository: RepositoryRef,
   token: string,
-  onProgress: (progress: LoadProgress) => void,
+  onUpdate: (update: RepositoryLoadUpdate) => void,
   signal?: AbortSignal,
 ): Promise<RepositorySnapshot> => {
   const issues: IssueRecord[] = []
+  const fetchedAt = new Date().toISOString()
   let cursor: string | null = null
   let hasNextPage = true
-  let metadata: Omit<RepositorySnapshot, 'issues' | 'fetchedAt'> | null = null
+  let snapshot: RepositorySnapshot | null = null
 
   while (hasNextPage) {
     const page: RepositoryPageResponse = await request(
@@ -158,7 +159,7 @@ export const fetchRepositorySnapshot = async (
     issues.push(
       ...connection.nodes.map((issue) => issueRecord(repositoryData.nameWithOwner, issue)),
     )
-    metadata = {
+    snapshot = {
       repository: {
         owner: repository.owner,
         name: repository.name,
@@ -167,9 +168,14 @@ export const fetchRepositorySnapshot = async (
       },
       description: repositoryData.description,
       isPrivate: repositoryData.isPrivate,
+      issues: [...issues],
+      fetchedAt,
       rateLimit: page.rateLimit,
     }
-    onProgress({ loaded: issues.length, total: connection.totalCount })
+    onUpdate({
+      progress: { loaded: issues.length, total: connection.totalCount },
+      snapshot,
+    })
     const nextCursor = connection.pageInfo.endCursor
     hasNextPage = connection.pageInfo.hasNextPage
     if (hasNextPage && (nextCursor === null || nextCursor === cursor)) {
@@ -178,10 +184,10 @@ export const fetchRepositorySnapshot = async (
     cursor = nextCursor
   }
 
-  if (metadata === null) {
+  if (snapshot === null) {
     throw new GitHubGraphQlError('GitHub returned no repository data.')
   }
-  return { ...metadata, issues, fetchedAt: new Date().toISOString() }
+  return snapshot
 }
 
 export const fetchIssueBody = async (

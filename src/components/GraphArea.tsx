@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from 'react'
 import { graphDeliveryMode } from '../domain/graph-delivery'
-import type { GraphAnalysis } from '../domain/types'
+import type { GraphAnalysis, LoadProgress } from '../domain/types'
 import type { ColorMode } from '../hooks/use-color-mode'
 import type { LayoutDirection } from './GraphCanvas'
 import { GraphGate } from './GraphGate'
@@ -15,6 +15,7 @@ interface GraphAreaProps {
   colorMode: ColorMode
   direction: LayoutDirection
   issueKeys: ReadonlySet<string>
+  loadProgress: LoadProgress | null
   selectedKey: string | null
   warning: string
   onDirectionChange: (direction: LayoutDirection) => void
@@ -28,6 +29,7 @@ export const GraphArea = ({
   colorMode,
   direction,
   issueKeys,
+  loadProgress,
   selectedKey,
   warning,
   onDirectionChange,
@@ -47,6 +49,20 @@ export const GraphArea = ({
   ]
     .filter((message) => message.length > 0)
     .join(' ')
+
+  if (loadProgress !== null) {
+    return (
+      <GraphGate
+        issueCount={analysis.nodes.size}
+        mode="repository-loading"
+        onOpenInspector={onOpenInspector}
+        onOpenIssues={onOpenIssues}
+        progress={loadProgress}
+        selected={selectedKey !== null}
+        warning=""
+      />
+    )
+  }
 
   return (
     <>

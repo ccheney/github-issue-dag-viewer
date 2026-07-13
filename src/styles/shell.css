@@ -78,6 +78,11 @@
   border-color: var(--borderColor-success-emphasis, #1f883d);
 }
 
+.source-loading {
+  color: var(--fgColor-attention, #9a6700);
+  border-color: var(--borderColor-attention-emphasis, #bf8700);
+}
+
 .header-actions {
   gap: 4px;
 }

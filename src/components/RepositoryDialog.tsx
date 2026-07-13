@@ -1,6 +1,8 @@
 import { KeyIcon, MarkGithubIcon, RepoIcon } from '@primer/octicons-react'
 import { Button, Flash, FormControl, Link, TextInput } from '@primer/react'
 import { useEffect, useRef, useState } from 'react'
+import type { LoadProgress } from '../domain/types'
+import { RepositoryLoadProgress } from './RepositoryLoadProgress'
 
 const TOKEN_TEMPLATE_URL =
   'https://github.com/settings/personal-access-tokens/new?name=Issue%20Atlas&description=Read%20issue%20dependency%20graphs&expires_in=30&issues=read'
@@ -9,6 +11,7 @@ interface RepositoryDialogProps {
   open: boolean
   initialRepository: string
   loading: boolean
+  progress: LoadProgress | null
   error: string | null
   onClose: () => void
   onConnect: (repository: string, token: string) => void
@@ -19,6 +22,7 @@ export const RepositoryDialog = ({
   open,
   initialRepository,
   loading,
+  progress,
   error,
   onClose,
   onConnect,
@@ -94,6 +98,12 @@ export const RepositoryDialog = ({
             memory and is sent only to api.github.com.
           </FormControl.Caption>
         </FormControl>
+
+        {loading && progress !== null ? (
+          <div aria-live="polite" className="dialog-load-progress" role="status">
+            <RepositoryLoadProgress progress={progress} />
+          </div>
+        ) : null}
 
         <div className="dialog-actions">
           <Button disabled={loading} onClick={onDemo} type="button" variant="invisible">

@@ -4,6 +4,7 @@ import { Button, Link, Text } from '@primer/react'
 interface AppHeaderProps {
   repository: string
   source: 'demo' | 'github'
+  loading: boolean
   onChangeRepository: () => void
   onExport: () => void
 }
@@ -11,10 +12,12 @@ interface AppHeaderProps {
 export const AppHeader = ({
   repository,
   source,
+  loading,
   onChangeRepository,
   onExport,
 }: AppHeaderProps): React.JSX.Element => {
   const [owner, name] = repository.split('/')
+  const sourceState = loading && source === 'github' ? 'loading' : source
 
   return (
     <header className="app-header">
@@ -37,14 +40,15 @@ export const AppHeader = ({
           <span aria-hidden="true">/</span>
           <Link href={`https://github.com/${repository}`}>{name}</Link>
         </span>
-        <span className={`source-badge source-${source}`}>
-          {source === 'demo' ? 'Demo' : 'Live'}
+        <span className={`source-badge source-${sourceState}`}>
+          {sourceState === 'demo' ? 'Demo' : sourceState === 'loading' ? 'Loading' : 'Live'}
         </span>
       </div>
 
       <nav className="header-actions" aria-label="Application controls">
         <Button
           aria-label="Export"
+          disabled={loading}
           leadingVisual={DownloadIcon}
           onClick={onExport}
           variant="invisible"

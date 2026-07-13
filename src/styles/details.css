@@ -163,6 +163,26 @@
   padding-top: 4px;
 }
 
+.dialog-load-progress {
+  padding: 10px 12px;
+  background: var(--bgColor-muted, #f6f8fa);
+  border: 1px solid var(--borderColor-muted, #d8dee4);
+  border-radius: 6px;
+}
+
+.repository-load-progress {
+  display: grid;
+  gap: 5px;
+  color: var(--fgColor-muted, #59636e);
+  font-size: 11px;
+}
+
+.repository-load-progress progress {
+  width: 100%;
+  height: 6px;
+  accent-color: var(--bgColor-accent-emphasis, #0969da);
+}
+
 .load-overlay {
   position: fixed;
   z-index: 20;
@@ -180,15 +200,14 @@
 }
 
 .load-overlay > :first-child {
-  grid-row: 1 / 3;
   align-self: center;
+}
+
+.load-overlay-content {
+  display: grid;
+  gap: 3px;
 }
 
 .load-overlay strong {
   font-size: 13px;
-}
-
-.load-overlay span {
-  color: var(--fgColor-muted, #59636e);
-  font-size: 11px;
 }

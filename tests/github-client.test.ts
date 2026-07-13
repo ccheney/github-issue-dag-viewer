@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { RepositoryLoadUpdate } from '../src/domain/types'
 import { fetchIssueBody, fetchRepositorySnapshot, GitHubGraphQlError } from '../src/github/client'
 import {
   issueDetails,
@@ -42,7 +43,7 @@ describe('fetchRepositorySnapshot', () => {
         }),
       ),
     )
-    const onProgress = vi.fn()
+    const onProgress = vi.fn<(update: RepositoryLoadUpdate) => void>()
 
     const snapshot = await fetchRepositorySnapshot(repository, TEST_TOKEN, onProgress)
 
@@ -58,7 +59,10 @@ describe('fetchRepositorySnapshot', () => {
       key: 'octo-org/roadmap#101',
       repository: 'octo-org/roadmap',
     })
-    expect(onProgress).toHaveBeenCalledWith({ loaded: 1, total: 1 })
+    expect(onProgress).toHaveBeenCalledWith({
+      progress: { loaded: 1, total: 1 },
+      snapshot,
+    })
     expect(requestAt(0)).toMatchObject({
       body: { variables: { owner: 'octo-org', name: 'roadmap', cursor: null } },
       init: {
@@ -83,14 +87,21 @@ describe('fetchRepositorySnapshot', () => {
         ),
       )
       .mockResolvedValueOnce(jsonResponse(repositoryPage({ nodes: [issueNode(2)], totalCount: 2 })))
-    const onProgress = vi.fn()
+    const onProgress = vi.fn<(update: RepositoryLoadUpdate) => void>()
 
     const snapshot = await fetchRepositorySnapshot(repository, TEST_TOKEN, onProgress)
 
     expect(snapshot.issues.map(({ number }) => number)).toEqual([1, 2])
     expect(requestAt(0).body.variables.cursor).toBeNull()
     expect(requestAt(1).body.variables.cursor).toBe('cursor-1')
-    expect(onProgress.mock.calls).toEqual([[{ loaded: 1, total: 2 }], [{ loaded: 2, total: 2 }]])
+    const updates = onProgress.mock.calls.map(([update]) => update)
+    expect(updates.map(({ progress }) => progress)).toEqual([
+      { loaded: 1, total: 2 },
+      { loaded: 2, total: 2 },
+    ])
+    expect(
+      updates.map(({ snapshot: partial }) => partial.issues.map(({ number }) => number)),
+    ).toEqual([[1], [1, 2]])
   })
 
   it('rejects an inaccessible repository with a bounded message', async () => {

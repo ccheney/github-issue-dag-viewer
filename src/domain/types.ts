@@ -115,5 +115,10 @@ export interface LoadProgress {
   total: number
 }
 
+export interface RepositoryLoadUpdate {
+  progress: LoadProgress
+  snapshot: RepositorySnapshot
+}
+
 export const issueKey = (repository: string, number: number): string =>
   `${repository.toLowerCase()}#${number}`

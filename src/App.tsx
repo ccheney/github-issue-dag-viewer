@@ -1,6 +1,6 @@
 import { SyncIcon } from '@primer/octicons-react'
 import { BaseStyles, Spinner, ThemeProvider } from '@primer/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppHeader } from './components/AppHeader'
 import { FilterPanel } from './components/FilterPanel'
 import { GraphArea } from './components/GraphArea'
@@ -8,11 +8,12 @@ import type { LayoutDirection } from './components/GraphCanvas'
 import { IssueInspector } from './components/IssueInspector'
 import { IssueList } from './components/IssueList'
 import { RepositoryDialog } from './components/RepositoryDialog'
+import { RepositoryLoadProgress } from './components/RepositoryLoadProgress'
 import { StatsBar } from './components/StatsBar'
 import { demoSnapshot } from './demo/demo-data'
 import { availableLabels, filterIssueKeys } from './domain/filters'
 import { analyzeGraph } from './domain/graph'
-import type { GraphFilters, LoadProgress, RepositorySnapshot } from './domain/types'
+import type { GraphAnalysis, GraphFilters, LoadProgress, RepositorySnapshot } from './domain/types'
 import { fetchIssueBody, fetchRepositorySnapshot } from './github/client'
 import { parseRepositoryInput } from './github/parse-repository'
 import { useColorMode } from './hooks/use-color-mode'
@@ -32,6 +33,13 @@ const initialFilters = (): GraphFilters => ({
 
 const repositoryFromUrl = (): string =>
   new URLSearchParams(window.location.search).get('repo') ?? ''
+
+const updateRepositoryUrl = (repository: string | null): void => {
+  const url = new URL(window.location.href)
+  if (repository === null) url.searchParams.delete('repo')
+  else url.searchParams.set('repo', repository)
+  window.history.replaceState(null, '', url)
+}
 
 const downloadJson = (snapshot: RepositorySnapshot, keys: ReadonlySet<string>): void => {
   const issues = snapshot.issues.filter(({ key }) => keys.has(key))
@@ -59,6 +67,28 @@ const selectInitialIssue = (snapshot: RepositorySnapshot): string | null => {
     [...analysis.ready][0] ?? snapshot.issues.find(({ state }) => state === 'OPEN')?.key ?? null
   )
 }
+
+const graphWarningFor = (analysis: GraphAnalysis, snapshot: RepositorySnapshot): string =>
+  [
+    analysis.cycles.length > 0
+      ? `${analysis.cycles.length} dependency cycle${analysis.cycles.length === 1 ? '' : 's'} detected.`
+      : null,
+    snapshot.issues.some(({ dependencyDataTruncated }) => dependencyDataTruncated)
+      ? 'At least one issue has more than 100 dependency relationships; that node is partial.'
+      : null,
+  ]
+    .filter((message): message is string => message !== null)
+    .join(' ')
+
+const RepositoryLoadOverlay = ({ progress }: { progress: LoadProgress }): React.JSX.Element => (
+  <div className="load-overlay">
+    <Spinner size="medium" />
+    <div className="load-overlay-content">
+      <strong>Reading issue dependencies</strong>
+      <RepositoryLoadProgress progress={progress} />
+    </div>
+  </div>
+)
 
 export default function App(): React.JSX.Element {
   const initialRepository = repositoryFromUrl()
@@ -97,6 +127,7 @@ export default function App(): React.JSX.Element {
   useEffect(() => {
     if (
       source !== 'github' ||
+      loading ||
       selectedIssue === null ||
       selectedIssue.isExternal ||
       selectedIssue.body !== null ||
@@ -124,38 +155,55 @@ export default function App(): React.JSX.Element {
         if (!controller.signal.aborted) setBodyLoading(false)
       })
     return () => controller.abort()
-  }, [selectedIssue, snapshot.repository, source])
+  }, [loading, selectedIssue, snapshot.repository, source])
 
   const loadRepository = useCallback(async (input: string, token: string): Promise<void> => {
+    let controller: AbortController | null = null
     try {
       const repository = parseRepositoryInput(input)
-      if (token.trim().length === 0) throw new Error('A GitHub token is required for GraphQL.')
+      const normalizedToken = token.trim()
+      if (normalizedToken.length === 0) throw new Error('A GitHub token is required for GraphQL.')
       loadAbortRef.current?.abort()
-      const controller = new AbortController()
+      controller = new AbortController()
       loadAbortRef.current = controller
+      tokenRef.current = normalizedToken
       setLoading(true)
       setError(null)
       setProgress({ loaded: 0, total: 0 })
+      let published = false
       const loaded = await fetchRepositorySnapshot(
         repository,
-        token.trim(),
-        setProgress,
+        normalizedToken,
+        ({ progress: nextProgress, snapshot: partialSnapshot }) => {
+          setProgress(nextProgress)
+          if (published) {
+            startTransition(() => setSnapshot(partialSnapshot))
+            return
+          }
+
+          published = true
+          setSnapshot(partialSnapshot)
+          setSource('github')
+          setFilters(initialFilters())
+          setSelectedKey(selectInitialIssue(partialSnapshot))
+          setDialogOpen(false)
+          updateRepositoryUrl(partialSnapshot.repository.nameWithOwner)
+        },
         controller.signal,
       )
-      tokenRef.current = token.trim()
+      if (controller.signal.aborted) return
       setSnapshot(loaded)
-      setSource('github')
-      setFilters(initialFilters())
-      setSelectedKey(selectInitialIssue(loaded))
-      setDialogOpen(false)
-      const url = new URL(window.location.href)
-      url.searchParams.set('repo', loaded.repository.nameWithOwner)
-      window.history.replaceState(null, '', url)
     } catch (reason) {
+      if (controller?.signal.aborted) return
+      tokenRef.current = ''
       setError(reason instanceof Error ? reason.message : 'Unable to load repository.')
+      setDialogOpen(true)
     } finally {
-      setLoading(false)
-      setProgress(null)
+      if (controller === null || loadAbortRef.current === controller) {
+        loadAbortRef.current = null
+        setLoading(false)
+        setProgress(null)
+      }
     }
   }, [])
 
@@ -168,29 +216,16 @@ export default function App(): React.JSX.Element {
     setSelectedKey(selectInitialIssue(demoSnapshot))
     setDialogOpen(false)
     setError(null)
-    const url = new URL(window.location.href)
-    url.searchParams.delete('repo')
-    window.history.replaceState(null, '', url)
+    updateRepositoryUrl(null)
   }
 
-  const hasTruncatedDependencies = snapshot.issues.some(
-    ({ dependencyDataTruncated }) => dependencyDataTruncated,
-  )
-  const graphWarning = [
-    analysis.cycles.length > 0
-      ? `${analysis.cycles.length} dependency cycle${analysis.cycles.length === 1 ? '' : 's'} detected.`
-      : null,
-    hasTruncatedDependencies
-      ? 'At least one issue has more than 100 dependency relationships; that node is partial.'
-      : null,
-  ]
-    .filter((message): message is string => message !== null)
-    .join(' ')
+  const graphWarning = loading ? '' : graphWarningFor(analysis, snapshot)
 
   return (
     <ThemeProvider colorMode="auto" dayScheme="light" nightScheme="dark">
       <BaseStyles className="app-root">
         <AppHeader
+          loading={loading}
           onChangeRepository={() => setDialogOpen(true)}
           onExport={() => downloadJson(snapshot, visibleKeys)}
           repository={snapshot.repository.nameWithOwner}
@@ -220,6 +255,7 @@ export default function App(): React.JSX.Element {
             direction={direction}
             issueKeys={visibleKeys}
             key={snapshot.fetchedAt}
+            loadProgress={progress}
             onDirectionChange={setDirection}
             onOpenInspector={() => setInspectorOpen(true)}
             onOpenIssues={() => setIssuesOpen(true)}
@@ -241,17 +277,7 @@ export default function App(): React.JSX.Element {
           </div>
         </main>
 
-        {loading ? (
-          <div aria-live="polite" className="load-overlay">
-            <Spinner size="medium" />
-            <strong>Reading issue dependencies</strong>
-            <span>
-              {progress === null || progress.total === 0
-                ? 'Connecting to GitHub…'
-                : `${progress.loaded.toLocaleString()} of ${progress.total.toLocaleString()} issues`}
-            </span>
-          </div>
-        ) : null}
+        {loading && progress !== null ? <RepositoryLoadOverlay progress={progress} /> : null}
 
         <RepositoryDialog
           error={error}
@@ -261,6 +287,7 @@ export default function App(): React.JSX.Element {
           onConnect={(repository, token) => void loadRepository(repository, token)}
           onDemo={loadDemo}
           open={dialogOpen}
+          progress={progress}
         />
         <div aria-live="polite" className="sr-only">
           {loading ? (
