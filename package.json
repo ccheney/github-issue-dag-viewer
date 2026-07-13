@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "benchmark:graphs": "bun run scripts/benchmark-large-graphs.ts",
-    "verify": "bun run check && bun run test && bun run build"
+    "verify": "bun run check && bun run test && bun run test:e2e && bun run build"
   },
   "dependencies": {
     "@primer/octicons-react": "19.29.2",
@@ -30,6 +30,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
     "@biomejs/biome": "2.5.3",
     "@playwright/test": "1.61.1",
     "@testing-library/react": "16.3.2",

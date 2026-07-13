@@ -270,6 +270,7 @@ export const GraphCanvas = ({
         </div>
         <div className="graph-actions">
           <Button
+            aria-label="Issues"
             className="mobile-pane-action"
             leadingVisual={ListUnorderedIcon}
             onClick={onOpenIssues}
@@ -278,6 +279,7 @@ export const GraphCanvas = ({
             Issues
           </Button>
           <Button
+            aria-label="Details"
             className="mobile-pane-action"
             disabled={selectedKey === null}
             leadingVisual={SidebarExpandIcon}
@@ -288,6 +290,7 @@ export const GraphCanvas = ({
           </Button>
           <Button
             aria-label="Use left-to-right layout"
+            aria-pressed={direction === 'LR'}
             leadingVisual={ColumnsIcon}
             onClick={() => onDirectionChange('LR')}
             size="small"
@@ -297,6 +300,7 @@ export const GraphCanvas = ({
           </Button>
           <Button
             aria-label="Use top-to-bottom layout"
+            aria-pressed={direction === 'TB'}
             leadingVisual={ThreeBarsIcon}
             onClick={() => onDirectionChange('TB')}
             size="small"

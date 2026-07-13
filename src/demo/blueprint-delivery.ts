@@ -142,7 +142,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
       'domain-tests',
       'graphql-tests',
     ],
-    completed: false,
+    completed: true,
     outcome: 'Exercise the complete zero-token user journey in a real browser.',
     scope: [
       'Test searching, filtering, selection, path focus, layout changes, theme changes, exports, and dialogs.',

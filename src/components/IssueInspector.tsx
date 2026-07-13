@@ -12,6 +12,12 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { GraphAnalysis, IssueRecord } from '../domain/types'
 
+const MarkdownTaskInput = (props: React.ComponentProps<'input'>): React.JSX.Element => (
+  <input {...props} aria-label={props.checked ? 'Completed task' : 'Incomplete task'} />
+)
+
+const markdownComponents = { input: MarkdownTaskInput }
+
 interface IssueInspectorProps {
   analysis: GraphAnalysis
   issue: IssueRecord | null
@@ -152,7 +158,9 @@ export const IssueInspector = ({
           ) : issue.body === null || issue.body.length === 0 ? (
             <p className="muted">No description provided.</p>
           ) : (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{issue.body}</ReactMarkdown>
+            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+              {issue.body}
+            </ReactMarkdown>
           )}
         </section>
       </div>

@@ -64,6 +64,7 @@ export const FilterPanel = ({
         <FormControl>
           <FormControl.Label>State</FormControl.Label>
           <select
+            aria-label="State"
             className="primer-select"
             onChange={(event) =>
               onChange({ ...filters, state: event.currentTarget.value as IssueStateFilter })
@@ -78,6 +79,7 @@ export const FilterPanel = ({
         <FormControl>
           <FormControl.Label>Readiness</FormControl.Label>
           <select
+            aria-label="Readiness"
             className="primer-select"
             onChange={(event) =>
               onChange({ ...filters, readiness: event.currentTarget.value as ReadinessFilter })

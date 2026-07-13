@@ -47,12 +47,14 @@ The production document defines a static policy with these properties:
 - Scripts load from self only.
 - Connections allow self and `https://api.github.com` only.
 - Images allow self, data URLs, and GitHub avatar hosts used by issue actors.
-- Frames and embedded objects are disabled.
+- Outbound frames and embedded objects are disabled.
 - Form actions are disabled.
 - Base URI is fixed to self.
 - Styles allow self and the inline styles required by Primer's runtime styling and graph label colors.
 
 Any new external runtime dependency requires an explicit threat review and CSP change. Do not broaden origins preemptively.
+
+GitHub Pages cannot add the response-header-only `frame-ancestors` directive. Do not put it in the meta policy, where browsers ignore it. Preventing another site from framing the viewer requires moving delivery behind a host that can emit `Content-Security-Policy: frame-ancestors 'none'`; the static Pages deployment does not claim that control.
 
 ## Markdown and links
 

@@ -113,6 +113,11 @@
     display: inline-flex;
   }
 
+  .graph-actions button {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
   .inspector-container {
     top: auto;
     height: min(70vh, 640px);
@@ -126,7 +131,8 @@
   }
 
   .graph-legend span:nth-child(n + 2),
-  .graph-actions button:nth-child(-n + 2) {
+  .graph-actions button:nth-child(3),
+  .graph-actions button:nth-child(4) {
     display: none;
   }
 

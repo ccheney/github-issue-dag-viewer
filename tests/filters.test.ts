@@ -23,11 +23,11 @@ describe('issue filters', () => {
       query: '',
       state: 'open',
       readiness: 'ready',
-      labels: new Set(['area:quality']),
+      labels: new Set(['area:delivery']),
       showExternal: true,
     })
 
-    expect([...results].toSorted()).toEqual(['ccheney/github-issue-dag-viewer#28'])
+    expect([...results].toSorted()).toEqual(['ccheney/github-issue-dag-viewer#29'])
   })
 
   it('returns a stable sorted label catalog', () => {
