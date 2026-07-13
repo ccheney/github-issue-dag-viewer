@@ -22,6 +22,7 @@ interface GraphCanvasProps {
   analysis: GraphAnalysis
   colorMode: ColorMode
   direction: LayoutDirection
+  fitRevision: number
   issueKeys: ReadonlySet<string>
   selectedKey: string | null
   onDirectionChange: (direction: LayoutDirection) => void
@@ -31,7 +32,7 @@ interface GraphCanvasProps {
 }
 
 const palette = (mode: ColorMode) =>
-  mode === 'day'
+  mode === 'light'
     ? {
         canvas: '#ffffff',
         node: '#f6f8fa',
@@ -82,7 +83,7 @@ const graphStyles = (mode: ColorMode): StylesheetJson => {
     {
       selector: 'node.ready',
       style: {
-        'background-color': mode === 'day' ? '#ddf4ff' : '#121d2f',
+        'background-color': mode === 'light' ? '#ddf4ff' : '#121d2f',
         'border-color': colors.ready,
         'border-width': 3,
       },
@@ -185,7 +186,12 @@ const focusSelection = (cy: Core, analysis: GraphAnalysis, selectedKey: string |
 const downloadPng = (cy: Core): void => {
   const anchor = document.createElement('a')
   anchor.download = 'issue-dependency-graph.png'
-  anchor.href = cy.png({ bg: palette('day').canvas, full: true, maxWidth: 6000, maxHeight: 6000 })
+  anchor.href = cy.png({
+    bg: palette('light').canvas,
+    full: true,
+    maxWidth: 6000,
+    maxHeight: 6000,
+  })
   anchor.click()
 }
 
@@ -193,6 +199,7 @@ export const GraphCanvas = ({
   analysis,
   colorMode,
   direction,
+  fitRevision,
   issueKeys,
   selectedKey,
   onDirectionChange,
@@ -202,6 +209,7 @@ export const GraphCanvas = ({
 }: GraphCanvasProps): React.JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null)
   const cyRef = useRef<Core | null>(null)
+  const fitRevisionRef = useRef(fitRevision)
   const onSelectRef = useRef(onSelect)
   const selectedKeyRef = useRef(selectedKey)
   onSelectRef.current = onSelect
@@ -210,6 +218,8 @@ export const GraphCanvas = ({
 
   useEffect(() => {
     if (containerRef.current === null) return
+    const shouldFit = fitRevisionRef.current !== fitRevision
+    fitRevisionRef.current = fitRevision
     const cy = cytoscape({
       container: containerRef.current,
       elements,
@@ -219,7 +229,7 @@ export const GraphCanvas = ({
     })
     cyRef.current = cy
     cy.on('tap', 'node', (event) => onSelectRef.current(event.target.id()))
-    cy.layout({
+    const layout = cy.layout({
       name: 'dagre',
       rankDir: direction,
       rankSep: 90,
@@ -229,18 +239,26 @@ export const GraphCanvas = ({
       animate: elements.length < 500,
       animationDuration: 380,
       fit: false,
-    } as dagre.DagreLayoutOptions).run()
+    } as dagre.DagreLayoutOptions)
+    if (shouldFit) {
+      cy.one('layoutstop', () => {
+        if (!cy.destroyed() && cy.nodes().length > 0) cy.fit(cy.elements(), 48)
+      })
+    }
+    layout.run()
     const initialNode =
       selectedKeyRef.current === null
         ? cy.nodes().first()
         : cy.getElementById(selectedKeyRef.current)
-    cy.zoom(0.72)
-    if (!initialNode.empty()) cy.center(initialNode)
+    if (!shouldFit) {
+      cy.zoom(0.72)
+      if (!initialNode.empty()) cy.center(initialNode)
+    }
     return () => {
       cy.destroy()
       cyRef.current = null
     }
-  }, [colorMode, direction, elements])
+  }, [colorMode, direction, elements, fitRevision])
 
   useEffect(() => {
     const cy = cyRef.current

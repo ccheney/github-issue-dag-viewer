@@ -3,12 +3,35 @@ import { captureBrowserErrors, expectNoAccessibilityViolations } from './support
 
 test('completes the zero-token desktop workflow', async ({ page }) => {
   const browserErrors = captureBrowserErrors(page)
+  await page.emulateMedia({ colorScheme: 'light' })
   await page.goto('/')
 
   await expect(page).toHaveTitle('Issue Atlas · GitHub dependency explorer')
+  await expect(page.locator('html')).toHaveAttribute('data-color-mode', 'auto')
+  const systemLightBackground = await page.evaluate(
+    () => getComputedStyle(document.body).backgroundColor,
+  )
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect
+    .poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor))
+    .not.toBe(systemLightBackground)
+  await expect(
+    page.getByRole('button', { name: 'Theme: system. Switch to light mode' }),
+  ).toBeVisible()
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.getByRole('link', { name: 'ccheney', exact: true })).toHaveAttribute(
+    'href',
+    'https://github.com/ccheney',
+  )
+  await expect(
+    page.getByRole('link', { name: 'github-issue-dag-viewer', exact: true }),
+  ).toHaveAttribute('href', 'https://github.com/ccheney/github-issue-dag-viewer')
   await expect(
     page.getByRole('heading', { name: 'Deploy the static application to GitHub Pages' }),
   ).toBeVisible()
+  const task = page.getByRole('checkbox', { name: 'Incomplete task' }).first()
+  await expect(task).toHaveCSS('appearance', 'none')
+  await expect(task.locator('xpath=..')).toHaveCSS('list-style-type', 'none')
 
   const issueList = page.getByRole('list', { name: 'Filtered issues' })
   const search = page.getByRole('textbox', { name: 'Search issues' })
@@ -25,12 +48,19 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   ).toBeVisible()
 
   await search.fill('')
-  await page.getByLabel('State').selectOption('open')
-  await page.getByLabel('Readiness').selectOption('ready')
+  await search.fill('is:issue state:open is:ready')
   await expect(issueList.getByRole('button')).toHaveCount(1)
   await expect(
     issueList.getByRole('button', { name: /Deploy the static application to GitHub Pages/ }),
   ).toBeVisible()
+  await page.getByRole('button', { name: 'Labels', exact: true }).click()
+  const labelSearch = page.getByRole('textbox', { name: 'Filter labels' })
+  await labelSearch.fill('delivery')
+  const deliveryLabel = page.getByRole('menuitemcheckbox', { name: 'area:delivery' })
+  await expect(deliveryLabel).toBeVisible()
+  await deliveryLabel.click()
+  await expect(search).toHaveValue('is:issue state:open is:ready label:"area:delivery"')
+  await page.keyboard.press('Escape')
 
   const horizontal = page.getByRole('button', { name: 'Use left-to-right layout' })
   const vertical = page.getByRole('button', { name: 'Use top-to-bottom layout' })
@@ -39,10 +69,20 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await expect(vertical).toHaveAttribute('aria-pressed', 'true')
   await expect(horizontal).toHaveAttribute('aria-pressed', 'false')
 
-  const theme = page.getByRole('button', { name: 'Use dark mode' })
+  const theme = page.getByRole('button', { name: 'Theme: system. Switch to light mode' })
   await theme.click()
-  await expect(page.getByRole('button', { name: 'Use light mode' })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Theme: light. Switch to dark mode' }),
+  ).toBeVisible()
+  await expect(page.locator('html')).toHaveAttribute('data-color-mode', 'light')
+  const lightBackground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+  await page.getByRole('button', { name: 'Theme: light. Switch to dark mode' }).click()
+  await expect(
+    page.getByRole('button', { name: 'Theme: dark. Switch to system mode' }),
+  ).toBeVisible()
   await expect(page.locator('html')).toHaveAttribute('data-color-mode', 'dark')
+  const darkBackground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+  expect(darkBackground).not.toBe(lightBackground)
 
   const jsonDownload = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Export' }).click()

@@ -70,7 +70,7 @@
   }
 
   .repository-crumb > svg,
-  .repository-crumb > span:nth-child(2) {
+  .repository-links {
     display: none;
   }
 

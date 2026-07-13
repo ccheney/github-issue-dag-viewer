@@ -22,7 +22,7 @@ import './styles/graph.css'
 import './styles/responsive.css'
 
 const initialFilters = (): GraphFilters => ({
-  query: '',
+  query: 'is:issue',
   state: 'all',
   readiness: 'all',
   labels: new Set(),
@@ -61,10 +61,11 @@ const selectInitialIssue = (snapshot: RepositorySnapshot): string | null => {
 
 export default function App(): React.JSX.Element {
   const initialRepository = repositoryFromUrl()
-  const [colorMode, toggleColorMode] = useColorMode()
+  const [colorMode, resolvedColorMode, toggleColorMode] = useColorMode()
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(demoSnapshot)
   const [source, setSource] = useState<'demo' | 'github'>('demo')
   const [filters, setFilters] = useState<GraphFilters>(initialFilters)
+  const [filterRevision, setFilterRevision] = useState(0)
   const [selectedKey, setSelectedKey] = useState<string | null>(() =>
     selectInitialIssue(demoSnapshot),
   )
@@ -86,6 +87,10 @@ export default function App(): React.JSX.Element {
   const selectIssue = (key: string): void => {
     setSelectedKey(key)
     setInspectorOpen(true)
+  }
+  const updateFilters = (nextFilters: GraphFilters): void => {
+    setFilters(nextFilters)
+    setFilterRevision((revision) => revision + 1)
   }
 
   useEffect(() => {
@@ -206,7 +211,7 @@ export default function App(): React.JSX.Element {
             <FilterPanel
               filters={filters}
               labels={labels}
-              onChange={setFilters}
+              onChange={updateFilters}
               onClose={() => setIssuesOpen(false)}
               resultCount={visibleKeys.size}
             />
@@ -219,8 +224,9 @@ export default function App(): React.JSX.Element {
           </aside>
           <GraphCanvas
             analysis={analysis}
-            colorMode={colorMode}
+            colorMode={resolvedColorMode}
             direction={direction}
+            fitRevision={filterRevision}
             issueKeys={visibleKeys}
             onDirectionChange={setDirection}
             onOpenInspector={() => setInspectorOpen(true)}

@@ -1,16 +1,36 @@
 import { useEffect, useState } from 'react'
 
-export type ColorMode = 'day' | 'night'
+export type ColorMode = 'light' | 'dark'
+export type ColorModePreference = ColorMode | 'auto'
 
 const preferredMode = (): ColorMode =>
-  window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
+  window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 
-export const useColorMode = (): [ColorMode, () => void] => {
-  const [mode, setMode] = useState<ColorMode>(() => preferredMode())
+const nextPreference: Record<ColorModePreference, ColorModePreference> = {
+  auto: 'light',
+  light: 'dark',
+  dark: 'auto',
+}
+
+export const useColorMode = (): [ColorModePreference, ColorMode, () => void] => {
+  const [preference, setPreference] = useState<ColorModePreference>('auto')
+  const [systemMode, setSystemMode] = useState<ColorMode>(() => preferredMode())
 
   useEffect(() => {
-    document.documentElement.dataset.colorMode = mode === 'night' ? 'dark' : 'light'
-  }, [mode])
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const updateSystemMode = (event: MediaQueryListEvent): void =>
+      setSystemMode(event.matches ? 'dark' : 'light')
+    media.addEventListener('change', updateSystemMode)
+    return () => media.removeEventListener('change', updateSystemMode)
+  }, [])
 
-  return [mode, () => setMode((current) => (current === 'day' ? 'night' : 'day'))]
+  useEffect(() => {
+    document.documentElement.dataset.colorMode = preference
+  }, [preference])
+
+  return [
+    preference,
+    preference === 'auto' ? systemMode : preference,
+    () => setPreference((current) => nextPreference[current]),
+  ]
 }
