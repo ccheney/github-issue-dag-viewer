@@ -21,14 +21,19 @@ test('keeps issue and detail panels operable on a phone', async ({ page }) => {
   const issuesPanel = page.getByRole('region', { name: 'Issues' })
   await issuesButton.click()
   await expect(issuesPanel).toBeVisible()
+  await page
+    .getByRole('list', { name: 'Filtered issues' })
+    .getByRole('button', { name: /Add the MIT license and concise project README/ })
+    .click()
   await issuesPanel.getByRole('button', { name: 'Close issue list' }).click()
   await expect(issuesPanel).toBeHidden()
 
-  await detailsButton.click()
   const inspector = page.getByRole('complementary', { name: 'Issue #39 details' })
   await expect(inspector).toBeVisible()
   await inspector.getByRole('button', { name: 'Close issue details' }).click()
   await expect(inspector).toBeHidden()
+  await detailsButton.click()
+  await expect(inspector).toBeVisible()
 
   await expectNoAccessibilityViolations(page)
   expect(browserErrors).toEqual([])

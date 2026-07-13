@@ -23,16 +23,19 @@ describe('issue filters', () => {
     expect([...results]).toEqual(['ccheney/github-issue-dag-viewer#16'])
   })
 
-  it('combines state, readiness, and label filters', () => {
+  it('combines state and label filters', () => {
     const results = filterIssueKeys(analysis, {
       query: '',
-      state: 'open',
-      readiness: 'ready',
+      state: 'closed',
+      readiness: 'all',
       labels: new Set(['area:docs']),
       showExternal: true,
     })
 
-    expect([...results].toSorted()).toEqual(['ccheney/github-issue-dag-viewer#39'])
+    expect([...results].toSorted()).toEqual([
+      'ccheney/github-issue-dag-viewer#31',
+      'ccheney/github-issue-dag-viewer#39',
+    ])
   })
 
   it('parses GitHub-style qualifiers without treating them as search text', () => {
@@ -60,7 +63,7 @@ describe('issue filters', () => {
   })
 
   it('filters directly from GitHub-style qualifiers', () => {
-    const query = 'is:issue state:open is:ready label:"area:docs"'
+    const query = 'is:issue state:closed label:"area:docs"'
     const parsed = parseFilterQuery(query)
     const results = filterIssueKeys(analysis, {
       query,
@@ -70,7 +73,10 @@ describe('issue filters', () => {
       showExternal: parsed.showExternal,
     })
 
-    expect([...results]).toEqual(['ccheney/github-issue-dag-viewer#39'])
+    expect([...results]).toEqual([
+      'ccheney/github-issue-dag-viewer#31',
+      'ccheney/github-issue-dag-viewer#39',
+    ])
   })
 
   it('returns a stable sorted label catalog', () => {

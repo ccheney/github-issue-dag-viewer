@@ -309,7 +309,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     title: 'Add the MIT license and concise project README',
     area: 'area:docs',
     dependencies: ['release'],
-    completed: false,
+    completed: true,
     outcome:
       'Finish the public repository with a standard MIT license and a concise README that gets users from purpose to a working viewer quickly.',
     scope: [

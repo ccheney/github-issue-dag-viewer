@@ -31,12 +31,14 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await expect(
     page.getByRole('link', { name: 'github-issue-dag-viewer', exact: true }),
   ).toHaveAttribute('href', 'https://github.com/ccheney/github-issue-dag-viewer')
+  const finalIssue = page.getByRole('button', {
+    name: /Add the MIT license and concise project README/,
+  })
+  await finalIssue.click()
   await expect(
-    page.getByRole('heading', {
-      name: 'Add the MIT license and concise project README',
-    }),
+    page.getByRole('heading', { name: 'Add the MIT license and concise project README' }),
   ).toBeVisible()
-  const task = page.getByRole('checkbox', { name: 'Incomplete task' }).first()
+  const task = page.getByRole('checkbox', { name: 'Completed task' }).first()
   await expect(task).toHaveCSS('appearance', 'none')
   await expect(task.locator('xpath=..')).toHaveCSS('list-style-type', 'none')
 
@@ -55,8 +57,8 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   ).toBeVisible()
 
   await search.fill('')
-  await search.fill('is:issue state:open is:ready')
-  await expect(issueList.getByRole('button')).toHaveCount(1)
+  await search.fill('is:issue state:closed')
+  await expect(issueList.getByRole('button')).toHaveCount(39)
   await expect(
     issueList.getByRole('button', {
       name: /Add the MIT license and concise project README/,
@@ -68,7 +70,8 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   const docsLabel = page.getByRole('menuitemcheckbox', { name: 'area:docs' })
   await expect(docsLabel).toBeVisible()
   await docsLabel.click()
-  await expect(search).toHaveValue('is:issue state:open is:ready label:"area:docs"')
+  await expect(search).toHaveValue('is:issue state:closed label:"area:docs"')
+  await expect(issueList.getByRole('button')).toHaveCount(2)
   await page.keyboard.press('Escape')
 
   const horizontal = page.getByRole('button', { name: 'Use left-to-right layout' })
@@ -78,7 +81,7 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await expect(vertical).toHaveAttribute('aria-pressed', 'true')
   await expect(horizontal).toHaveAttribute('aria-pressed', 'false')
   await page.emulateMedia({ colorScheme: 'dark' })
-  await expect(issueList.getByRole('button')).toHaveCount(1)
+  await expect(issueList.getByRole('button')).toHaveCount(2)
   await expect(page.locator(`[data-render-marker="${graphRenderMarker}"]`)).toHaveCount(1)
   await page.emulateMedia({ colorScheme: 'light' })
 
