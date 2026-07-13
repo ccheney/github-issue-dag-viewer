@@ -1,11 +1,13 @@
 import { ListUnorderedIcon, SidebarExpandIcon } from '@primer/octicons-react'
 import { Button } from '@primer/react'
 import type { GraphDeliveryMode } from '../domain/graph-delivery'
+import { GraphToolbarNotice } from './GraphToolbarNotice'
 
 interface GraphGateProps {
   issueCount: number
   mode: GraphDeliveryMode | 'loading'
   selected: boolean
+  warning: string
   onOpenInspector: () => void
   onOpenIssues: () => void
   onRender?: () => void
@@ -15,6 +17,7 @@ export const GraphGate = ({
   issueCount,
   mode,
   selected,
+  warning,
   onOpenInspector,
   onOpenIssues,
   onRender,
@@ -56,6 +59,7 @@ export const GraphGate = ({
           >
             Details
           </Button>
+          {warning.length > 0 ? <GraphToolbarNotice message={warning} /> : null}
         </div>
       </div>
       <div aria-live="polite" className="graph-gate" role="status">

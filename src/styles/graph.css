@@ -113,19 +113,3 @@
   color: var(--fgColor-default, #1f2328);
   font-size: 16px;
 }
-
-.graph-local-warning {
-  position: absolute;
-  z-index: 4;
-  top: 54px;
-  left: 50%;
-  width: max-content;
-  max-width: calc(100% - 24px);
-  padding: 7px 10px;
-  color: var(--fgColor-attention, #9a6700);
-  font-size: 12px;
-  background: var(--bgColor-attention-muted, #fff8c5);
-  border: 1px solid var(--borderColor-attention-emphasis, #bf8700);
-  border-radius: 6px;
-  transform: translateX(-50%);
-}

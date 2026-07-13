@@ -1,5 +1,5 @@
-import { AlertIcon, SyncIcon } from '@primer/octicons-react'
-import { BaseStyles, Flash, Spinner, ThemeProvider } from '@primer/react'
+import { SyncIcon } from '@primer/octicons-react'
+import { BaseStyles, Spinner, ThemeProvider } from '@primer/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppHeader } from './components/AppHeader'
 import { FilterPanel } from './components/FilterPanel'
@@ -176,6 +176,16 @@ export default function App(): React.JSX.Element {
   const hasTruncatedDependencies = snapshot.issues.some(
     ({ dependencyDataTruncated }) => dependencyDataTruncated,
   )
+  const graphWarning = [
+    analysis.cycles.length > 0
+      ? `${analysis.cycles.length} dependency cycle${analysis.cycles.length === 1 ? '' : 's'} detected.`
+      : null,
+    hasTruncatedDependencies
+      ? 'At least one issue has more than 100 dependency relationships; that node is partial.'
+      : null,
+  ]
+    .filter((message): message is string => message !== null)
+    .join(' ')
 
   return (
     <ThemeProvider colorMode="auto" dayScheme="light" nightScheme="dark">
@@ -187,18 +197,6 @@ export default function App(): React.JSX.Element {
           source={source}
         />
         <StatsBar stats={analysis.stats} />
-
-        {analysis.cycles.length > 0 || hasTruncatedDependencies ? (
-          <Flash className="graph-warning" variant="warning">
-            <AlertIcon size={16} />{' '}
-            {analysis.cycles.length > 0
-              ? `${analysis.cycles.length} dependency cycle${analysis.cycles.length === 1 ? '' : 's'} detected. `
-              : ''}
-            {hasTruncatedDependencies
-              ? 'At least one issue has more than 100 dependency relationships; that node is partial.'
-              : ''}
-          </Flash>
-        ) : null}
 
         <main className="workspace">
           <aside className={`issue-rail ${issuesOpen ? 'mobile-panel-open' : ''}`}>
@@ -227,6 +225,7 @@ export default function App(): React.JSX.Element {
             onOpenIssues={() => setIssuesOpen(true)}
             onSelect={selectIssue}
             selectedKey={selectedKey}
+            warning={graphWarning}
           />
           <div
             className={

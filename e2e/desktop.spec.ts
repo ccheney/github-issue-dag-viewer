@@ -11,6 +11,17 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   const graphRenderMarker = 'stable-cytoscape-canvas'
   const graphCanvas = page.locator('.graph-canvas canvas').first()
   await expect(graphCanvas).toBeAttached()
+  const pngButton = page.getByRole('button', { name: 'Download graph as PNG' })
+  await expect(pngButton).toHaveAttribute('aria-disabled', 'true')
+  await pngButton.hover()
+  await expect(
+    page.locator('[data-component="Tooltip"]').filter({
+      hasText:
+        'PNG export is unavailable because this layout exceeds 6,000 pixels. Use JSON Export.',
+    }),
+  ).toBeVisible()
+  await page.mouse.move(0, 0)
+  await expect(page.locator('.graph-local-warning')).toHaveCount(0)
   await graphCanvas.evaluate(
     (canvas, marker) => canvas.setAttribute('data-render-marker', marker),
     graphRenderMarker,
@@ -92,7 +103,8 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   )
 
   const pngDownload = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'Download graph as PNG' }).click()
+  await expect(pngButton).toHaveAttribute('aria-disabled', 'false')
+  await pngButton.click()
   await expect((await pngDownload).suggestedFilename()).toBe('issue-dependency-graph.png')
 
   const openRepository = page.getByRole('button', { name: 'Open repository' })

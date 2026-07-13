@@ -6,11 +6,12 @@ import {
   SidebarExpandIcon,
   ThreeBarsIcon,
 } from '@primer/octicons-react'
-import { Button } from '@primer/react'
+import { Button, Tooltip } from '@primer/react'
 import cytoscape, { type Core } from 'cytoscape'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { GraphAnalysis } from '../domain/types'
 import type { ColorMode } from '../hooks/use-color-mode'
+import { GraphToolbarNotice } from './GraphToolbarNotice'
 import {
   centerGraph,
   downloadPng,
@@ -32,6 +33,7 @@ interface GraphCanvasProps {
   direction: LayoutDirection
   issueKeys: ReadonlySet<string>
   selectedKey: string | null
+  warning: string
   onDirectionChange: (direction: LayoutDirection) => void
   onLayoutError: (message: string) => void
   onSelect: (key: string) => void
@@ -45,6 +47,7 @@ export const GraphCanvas = ({
   direction,
   issueKeys,
   selectedKey,
+  warning,
   onDirectionChange,
   onLayoutError,
   onSelect,
@@ -198,6 +201,7 @@ export const GraphCanvas = ({
           >
             Details
           </Button>
+          {warning.length > 0 ? <GraphToolbarNotice message={warning} /> : null}
           <Button
             aria-label="Use left-to-right layout"
             aria-pressed={direction === 'LR'}
@@ -230,26 +234,32 @@ export const GraphCanvas = ({
           >
             Fit
           </Button>
-          <Button
-            aria-label="Download graph as PNG"
-            disabled={!pngAvailable}
-            leadingVisual={DownloadIcon}
-            onClick={() => {
-              const cy = cyRef.current
-              if (cy !== null) downloadPng(cy)
-            }}
-            size="small"
-            variant="invisible"
+          <Tooltip
+            direction="sw"
+            text={
+              pngAvailable
+                ? 'Download the visible graph as PNG.'
+                : 'PNG export is unavailable because this layout exceeds 6,000 pixels. Use JSON Export.'
+            }
+            type="description"
           >
-            PNG
-          </Button>
+            <Button
+              aria-disabled={!pngAvailable}
+              aria-label="Download graph as PNG"
+              inactive={!pngAvailable}
+              leadingVisual={DownloadIcon}
+              onClick={() => {
+                const cy = cyRef.current
+                if (cy !== null && pngAvailable) downloadPng(cy)
+              }}
+              size="small"
+              variant="invisible"
+            >
+              PNG
+            </Button>
+          </Tooltip>
         </div>
       </div>
-      {!pngAvailable ? (
-        <div className="graph-local-warning" role="status">
-          PNG export is unavailable because this layout exceeds 6,000 pixels. Use JSON Export.
-        </div>
-      ) : null}
       <div
         aria-label={`Dependency graph showing ${issueKeys.size} issues. Select issues from the list for accessible details.`}
         className="graph-canvas"

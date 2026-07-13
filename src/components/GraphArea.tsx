@@ -1,4 +1,3 @@
-import { Flash } from '@primer/react'
 import { lazy, Suspense, useState } from 'react'
 import { graphDeliveryMode } from '../domain/graph-delivery'
 import type { GraphAnalysis } from '../domain/types'
@@ -17,6 +16,7 @@ interface GraphAreaProps {
   direction: LayoutDirection
   issueKeys: ReadonlySet<string>
   selectedKey: string | null
+  warning: string
   onDirectionChange: (direction: LayoutDirection) => void
   onOpenInspector: () => void
   onOpenIssues: () => void
@@ -29,6 +29,7 @@ export const GraphArea = ({
   direction,
   issueKeys,
   selectedKey,
+  warning,
   onDirectionChange,
   onOpenInspector,
   onOpenIssues,
@@ -38,14 +39,17 @@ export const GraphArea = ({
   const [layoutError, setLayoutError] = useState<string | null>(null)
   const mode = graphDeliveryMode(analysis.nodes.size)
   const shouldRender = mode === 'automatic' || largeGraphEnabled
+  const graphWarning = [
+    warning,
+    layoutError === null
+      ? ''
+      : `Graph layout failed: ${layoutError}. Use the issue list, filters, and JSON export.`,
+  ]
+    .filter((message) => message.length > 0)
+    .join(' ')
 
   return (
     <>
-      {layoutError === null ? null : (
-        <Flash className="graph-warning" variant="warning">
-          Graph layout failed: {layoutError}. Use the issue list, filters, and JSON export.
-        </Flash>
-      )}
       {shouldRender ? (
         <Suspense
           fallback={
@@ -55,6 +59,7 @@ export const GraphArea = ({
               onOpenInspector={onOpenInspector}
               onOpenIssues={onOpenIssues}
               selected={selectedKey !== null}
+              warning={graphWarning}
             />
           }
         >
@@ -72,6 +77,7 @@ export const GraphArea = ({
             onOpenIssues={onOpenIssues}
             onSelect={onSelect}
             selectedKey={selectedKey}
+            warning={graphWarning}
           />
         </Suspense>
       ) : (
@@ -81,6 +87,7 @@ export const GraphArea = ({
           onOpenInspector={onOpenInspector}
           onOpenIssues={onOpenIssues}
           selected={selectedKey !== null}
+          warning={graphWarning}
           {...(mode === 'opt-in'
             ? {
                 onRender: () => {

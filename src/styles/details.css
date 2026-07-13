@@ -192,16 +192,3 @@
   color: var(--fgColor-muted, #59636e);
   font-size: 11px;
 }
-
-.graph-warning {
-  position: fixed;
-  z-index: 8;
-  top: 112px;
-  left: 50%;
-  display: flex;
-  gap: 7px;
-  align-items: center;
-  max-width: min(720px, calc(100vw - 48px));
-  transform: translateX(-50%);
-  box-shadow: var(--shadow-resting-small, 0 1px 3px #1f23281f);
-}
