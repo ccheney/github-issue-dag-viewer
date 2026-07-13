@@ -16,12 +16,14 @@ test('completes the zero-token desktop workflow', async ({ page }) => {
   await pngButton.hover()
   await expect(
     page.locator('[data-component="Tooltip"]').filter({
-      hasText:
-        'PNG export is unavailable because this layout exceeds 6,000 pixels. Use JSON Export.',
+      hasText: 'PNG is limited to 6,000 pixels per dimension. Download SVG for the complete graph.',
     }),
   ).toBeVisible()
   await page.mouse.move(0, 0)
   await expect(page.locator('.graph-local-warning')).toHaveCount(0)
+  const svgDownload = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download graph as SVG' }).click()
+  await expect((await svgDownload).suggestedFilename()).toBe('issue-dependency-graph.svg')
   await graphCanvas.evaluate(
     (canvas, marker) => canvas.setAttribute('data-render-marker', marker),
     graphRenderMarker,

@@ -1,6 +1,7 @@
 import {
   ColumnsIcon,
   DownloadIcon,
+  FileCodeIcon,
   ListUnorderedIcon,
   ScreenFullIcon,
   SidebarExpandIcon,
@@ -24,6 +25,7 @@ import {
   runLayout,
   setGraphVisibility,
 } from './graph-renderer'
+import { downloadSvg } from './graph-svg'
 
 export type { LayoutDirection } from './graph-renderer'
 
@@ -54,7 +56,7 @@ export const GraphCanvas = ({
   onOpenIssues,
   onOpenInspector,
 }: GraphCanvasProps): React.JSX.Element => {
-  const [pngAvailable, setPngAvailable] = useState(false)
+  const [pngAvailable, setPngAvailable] = useState<boolean | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const cyRef = useRef<Core | null>(null)
   const directionRef = useRef(direction)
@@ -126,6 +128,7 @@ export const GraphCanvas = ({
       return
     }
 
+    setPngAvailable(null)
     cy.stop(true)
     if (elementsChanged) {
       cy.elements().remove()
@@ -234,23 +237,37 @@ export const GraphCanvas = ({
           >
             Fit
           </Button>
+          <Button
+            aria-label="Download graph as SVG"
+            leadingVisual={FileCodeIcon}
+            onClick={() => {
+              const cy = cyRef.current
+              if (cy !== null) downloadSvg(cy, direction, colorMode)
+            }}
+            size="small"
+            variant="invisible"
+          >
+            SVG
+          </Button>
           <Tooltip
             direction="sw"
             text={
-              pngAvailable
-                ? 'Download the visible graph as PNG.'
-                : 'PNG export is unavailable because this layout exceeds 6,000 pixels. Use JSON Export.'
+              pngAvailable === null
+                ? 'PNG availability is being measured.'
+                : pngAvailable
+                  ? 'Download the visible graph as PNG.'
+                  : 'PNG is limited to 6,000 pixels per dimension. Download SVG for the complete graph.'
             }
             type="description"
           >
             <Button
-              aria-disabled={!pngAvailable}
+              aria-disabled={pngAvailable !== true}
               aria-label="Download graph as PNG"
-              inactive={!pngAvailable}
+              inactive={pngAvailable !== true}
               leadingVisual={DownloadIcon}
               onClick={() => {
                 const cy = cyRef.current
-                if (cy !== null && pngAvailable) downloadPng(cy)
+                if (cy !== null && pngAvailable === true) downloadPng(cy)
               }}
               size="small"
               variant="invisible"

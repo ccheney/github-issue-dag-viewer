@@ -38,7 +38,7 @@ The 5,000-node sparse chain reaches Dagre's recursive ordering limit and throws 
 | Fan-in | 1,000 | 566 × 93,974 | 566 × 6,000 | 12.95 MiB |
 | Fan-in | 5,000 | 566 × 469,974 | 566 × 6,000 | 12.95 MiB |
 
-The current cap prevents an unbounded bitmap allocation, but it crops most large layouts and therefore cannot be presented as a faithful full-graph export.
+The cap prevents an unbounded bitmap allocation, but a capped bitmap would crop most large layouts. The viewer therefore disables PNG for those layouts and offers SVG as the faithful full-graph visual export.
 
 ## Budgets and guardrails
 
@@ -47,7 +47,7 @@ The first release uses these defaults:
 - Up to 1,000 nodes: Dagre runs automatically, animation is disabled at the existing 500-element threshold, and the targets are analysis under 50 ms, layout under 1 second, and interaction under 20 ms on the reference machine.
 - 1,001–5,000 nodes: the graph library and layout stay paused behind explicit user consent. List, filter, detail, and JSON workflows remain available before layout.
 - Above 5,000 nodes: full-canvas layout is disabled until an alternative layout or virtualization strategy has measured evidence.
-- Full PNG export is disabled when either visible layout dimension exceeds 6,000 pixels. The viewer explains the limit and keeps JSON export available.
+- Full PNG export is disabled when either visible layout dimension exceeds 6,000 pixels. The viewer explains the limit and keeps complete SVG and JSON exports available.
 - Never retry the same failed Dagre layout automatically; a deep graph can spend more than 11 seconds before throwing.
 
 Layout failures are caught and surfaced without removing the issue list or JSON export. The benchmark does not hide product limits by raising timeouts or warning thresholds.

@@ -79,7 +79,9 @@ The application follows the operating system's light or dark preference. There i
 
 **Export** downloads readable JSON containing the active repository metadata and only issues in the current filter result. It never contains the token or request headers.
 
-**PNG** renders the currently visible Cytoscape graph on a light background. Output is bounded to 6,000 by 6,000 pixels; very large layouts can be cropped or lose readable label detail.
+**PNG** renders the currently visible Cytoscape graph on a light background. It is available only when both layout dimensions are at most 6,000 pixels.
+
+**SVG** downloads the complete visible graph as a scalable vector image in the active system color mode. It remains available when the graph is too large for a bounded PNG.
 
 ## Architecture
 
@@ -137,7 +139,7 @@ GitHub Pages cannot emit the response-header-only `frame-ancestors` directive. T
 - GitHub issue pagination is complete, but each issue's `blockedBy` and `blocking` connection is capped at 100 entries. The UI warns when a relationship is truncated.
 - Cross-repository nodes are partial references; their labels, actors, bodies, and complete dependency neighborhoods are not fetched.
 - Dagre layout becomes multi-second on graphs with thousands of issues and exceeded the stack on the measured 5,000-node chain. Layout requires consent above 1,000 issues and is unavailable above 5,000; current measurements are in [the large-graph benchmark](./performance/large-graph-benchmark.md).
-- PNG export is unavailable when either visible graph dimension exceeds 6,000 pixels. JSON remains the complete filtered data export.
+- PNG export is unavailable when either visible graph dimension exceeds 6,000 pixels. SVG remains a complete visual export, and JSON remains the complete filtered data export.
 - System color mode is the only theme mode.
 - The static Pages host cannot provide response-header framing controls.
 

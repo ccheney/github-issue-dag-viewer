@@ -46,7 +46,7 @@ bunx playwright install chromium
 
 ## Limits and documentation
 
-Dependency connections are capped at 100 relationships per issue, cross-repository nodes contain partial metadata, and graph layout is gated above 1,000 issues. JSON remains available when a graph or PNG export exceeds the measured limits.
+Dependency connections are capped at 100 relationships per issue, cross-repository nodes contain partial metadata, and graph layout is gated above 1,000 issues. SVG and JSON remain available when a PNG export exceeds the measured limits.
 
 - [Contributor and operations guide](./docs/contributor-guide.md)
 - [Product and architecture plans](./docs/plans/README.md)
