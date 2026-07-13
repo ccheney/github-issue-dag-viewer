@@ -29,9 +29,19 @@ for (const task of blueprintTasks) {
 
 export const blueprintIssueBody = (task: BlueprintTask): string => {
   const box = task.completed ? '[x]' : '[ ]'
-  const plan = ARCHITECTURE_TASKS.has(task.id)
-    ? '01-application-architecture-and-github-data.md'
-    : PLAN_BY_AREA[task.area]
+  const plans = task.plans ?? [
+    ARCHITECTURE_TASKS.has(task.id)
+      ? '01-application-architecture-and-github-data.md'
+      : PLAN_BY_AREA[task.area],
+  ]
+  const acceptance = typeof task.acceptance === 'string' ? [task.acceptance] : task.acceptance
+  const acceptanceItems =
+    task.includeStandardVerification === false
+      ? acceptance
+      : [
+          ...acceptance,
+          'Relevant formatting, linting, type checking, tests, and production builds pass.',
+        ]
   return `<!-- blueprint-id: ${task.id} -->
 ## Outcome
 
@@ -43,11 +53,10 @@ ${task.scope.map((item) => `- ${box} ${item}`).join('\n')}
 
 ## Acceptance criteria
 
-- ${box} ${task.acceptance}
-- ${box} Relevant formatting, linting, type checking, tests, and production builds pass.
+${acceptanceItems.map((item) => `- ${box} ${item}`).join('\n')}
 
 ## Plan sources
 
-- [${plan}](https://github.com/ccheney/github-issue-dag-viewer/blob/main/docs/plans/${plan})
+${plans.map((plan) => `- [${plan}](https://github.com/ccheney/github-issue-dag-viewer/blob/main/docs/plans/${plan})`).join('\n')}
 `
 }

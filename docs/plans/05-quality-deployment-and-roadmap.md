@@ -29,7 +29,7 @@ Verify graph correctness, browser behavior, credential boundaries, static delive
 - Strongly connected components and self-edges.
 - Ready queue, blocked count, critical path, and reachability.
 - Combined text, state, readiness, cycle, label, and external filters.
-- The 38-node, 115-edge implementation blueprint.
+- The 39-node, 116-edge implementation blueprint.
 
 ### GitHub client contract tests
 
@@ -96,7 +96,7 @@ After Pages deploys:
 
 1. Open the public site in zero-token demo mode.
 2. Load `ccheney/github-issue-dag-viewer` through the normal repository flow.
-3. Compare 38 nodes, 115 edges, issue titles, labels, states, dependencies, readiness, layers, and critical path.
+3. Compare 39 nodes, 116 edges, issue titles, labels, states, dependencies, readiness, layers, and critical path.
 4. Exercise selection and inspection across completed, ready, blocked, and deep critical-path issues.
 5. Confirm the browser sends repository data only to GitHub GraphQL.
 

@@ -119,4 +119,4 @@ Temporary publication tooling is not part of the shipped application. Once the n
 - Cycles and self-edges are reported without losing nodes.
 - Ready work agrees with the state of every incoming blocker.
 - Selection finds complete transitive upstream and downstream sets.
-- The offline blueprint contains 38 nodes and 115 edges matching the live issue graph.
+- The offline blueprint contains 39 nodes and 116 edges matching the live issue graph.

@@ -170,7 +170,7 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     title: 'Deploy the static application to GitHub Pages',
     area: 'area:delivery',
     dependencies: ['pages-architecture', 'security-boundary', 'ci'],
-    completed: false,
+    completed: true,
     outcome: 'Publish a production build from main with GitHub-native deployment provenance.',
     scope: [
       'Build and upload the Pages artifact with the official configure, upload, and deploy actions.',
@@ -303,5 +303,26 @@ export const deliveryTasks: readonly BlueprintTask[] = [
     ],
     acceptance:
       'The tagged artifact, Pages site, source, and issue state all identify the same verified revision.',
+  },
+  {
+    id: 'repository-license-readme',
+    title: 'Add the MIT license and concise project README',
+    area: 'area:docs',
+    dependencies: ['release'],
+    completed: false,
+    outcome:
+      'Finish the public repository with a standard MIT license and a concise README that gets users from purpose to a working viewer quickly.',
+    scope: [
+      'Add a standard MIT `LICENSE` file with the correct copyright year and holder.',
+      'Write a concise `README.md` covering the viewer’s purpose, hosted app, local setup, token/privacy boundary, and verification commands.',
+      'Keep detailed architecture and delivery rationale in `docs/plans` rather than duplicating it in the README.',
+    ],
+    acceptance: [
+      'GitHub recognizes the repository license as MIT.',
+      'A new user can understand the project, open the hosted viewer, and run it locally from the README alone.',
+      'README links and commands are valid, and relevant formatting, linting, type checking, tests, and production builds pass.',
+    ],
+    includeStandardVerification: false,
+    plans: ['00-product-scope-and-decisions.md', '05-quality-deployment-and-roadmap.md'],
   },
 ] as const

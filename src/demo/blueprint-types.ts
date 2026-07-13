@@ -16,6 +16,8 @@ export interface BlueprintTask {
   dependencies: readonly string[]
   completed: boolean
   outcome: string
-  scope: readonly [string, string]
-  acceptance: string
+  scope: readonly string[]
+  acceptance: string | readonly string[]
+  includeStandardVerification?: boolean
+  plans?: readonly string[]
 }

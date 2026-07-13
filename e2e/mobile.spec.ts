@@ -17,7 +17,7 @@ test('keeps issue and detail panels operable on a phone', async ({ page }) => {
   await expect(issuesPanel).toBeHidden()
 
   await detailsButton.click()
-  const inspector = page.getByRole('complementary', { name: 'Issue #30 details' })
+  const inspector = page.getByRole('complementary', { name: 'Issue #31 details' })
   await expect(inspector).toBeVisible()
   await inspector.getByRole('button', { name: 'Close issue details' }).click()
   await expect(inspector).toBeHidden()
